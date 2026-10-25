@@ -1,272 +1,160 @@
-// Tests de práctica CFGS STI.
-// Cada unidad es un archivo data/Mx_Uyy.js que registra BANCO["Mx_Uyy"] = [{p, r: [correcta, ...incorrectas], e}].
-// La primera respuesta de "r" es siempre la correcta; las opciones se barajan en cada intento.
-// La autoevaluación oficial está en data/Mx_Uyy_oficial.js como [{p, o: [opciones en orden original], c: índice correcta, e}].
+// Página de inicio CFGS STI: botonera de asignaturas, lanzador con desplegables y unidades desplegables.
+// Los exámenes se abren en examen.html?u=<unidad>&t=<1|2|azar|oficial|fallos>.
+// Datos: data/indice.js (módulos y unidades) y, en el navegador, la mejor nota y los fallos (comun.js).
 
-window.BANCO = window.BANCO || {};
 const app = document.getElementById("app");
-const POR_EXAMEN = 30;
-
-// --- Utilidades ---------------------------------------------------------
-
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-
-function barajar(lista) {
-  const a = lista.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-// Opciones como "Todas son correctas" se quedan en su sitio; si alguna opción se refiere a
-// otras ("las dos anteriores", "A) y B)"), no se baraja nada para no cambiar su sentido.
-const META = /^(todas|todos|ninguna|ninguno|las dos|ambas)\b/i;
-const REFERENCIA = /anterior|\b[A-D]\)|\b[A-D] y [A-D]\b/;
-
-function ordenarOpciones(textos, correcta) {
-  const lista = textos.map((texto, i) => ({ texto, correcta: i === correcta }));
-  if (textos.some((t) => REFERENCIA.test(t))) return lista;
-  const huecos = lista.map((o, i) => (META.test(o.texto) ? null : i)).filter((i) => i !== null);
-  const mezcla = barajar(huecos.map((i) => lista[i]));
-  huecos.forEach((pos, k) => { lista[pos] = mezcla[k]; });
-  return lista;
-}
-
-// Pregunta en formato común: {p, o, c, e} (las del banco normal tienen la correcta en r[0]).
-const normalizar = (q) => (q.o ? q : { p: q.p, o: q.r, c: 0, e: q.e });
-const esOficial = (id) => (INDICE.oficiales || []).includes(id);
-
-const almacen = {
-  leer(clave, defecto) {
-    try { return JSON.parse(localStorage.getItem(clave)) ?? defecto; } catch { return defecto; }
-  },
-  guardar(clave, valor) {
-    try { localStorage.setItem(clave, JSON.stringify(valor)); } catch { /* sin almacenamiento */ }
-  },
+const ESTILO = {
+  M1: { clase: "c-cian", color: "#62e7f2" },
+  M2: { clase: "c-violeta", color: "#b48cff" },
+  M3: { clase: "c-ambar", color: "#ffc857" },
+  M4: { clase: "c-rosa", color: "#ff7fd6" },
 };
+const enlace = (id, modo) => `examen.html?u=${id}&t=${modo}`;
+const nFallos = (id) => (fallos()[id] || []).length;
 
-// Carga el archivo de una unidad bajo demanda (funciona también abriendo el HTML en local).
-function cargarUnidad(id) {
-  if (BANCO[id]) return Promise.resolve(BANCO[id]);
-  return new Promise((ok, fallo) => {
-    const s = document.createElement("script");
-    s.src = `data/${id}.js`;
-    s.onload = () => (BANCO[id] ? ok(BANCO[id]) : fallo(new Error("Unidad vacía")));
-    s.onerror = () => fallo(new Error("No se pudo cargar la unidad"));
-    document.head.appendChild(s);
-  });
+// Tipos de examen disponibles para una unidad, con su mejor nota guardada.
+function tipos(id) {
+  const notas = mejores();
+  const lista = ["1", "2", "azar"];
+  if (esOficial(id)) lista.push("oficial");
+  if (nFallos(id)) lista.push("fallos");
+  return lista.map((modo) => ({ modo, nombre: MODOS[modo], nota: notas[`${id}/${modo}`] }));
 }
 
-function buscar(idUnidad) {
-  for (const m of INDICE.modulos) {
-    const u = m.unidades.find((x) => x.id === idUnidad);
-    if (u) return { modulo: m, unidad: u };
-  }
-  return null;
+// Una unidad está superada si tiene aprobados los dos exámenes de 30 preguntas.
+function superada(id) {
+  const n = mejores();
+  return (n[`${id}/1`] ?? 0) >= 5 && (n[`${id}/2`] ?? 0) >= 5;
 }
 
-const mejores = () => almacen.leer("sti-mejores", {});
-const fallos = () => almacen.leer("sti-fallos", {});
+function pintarBotonera(vista) {
+  const botones = INDICE.modulos.map((m) => ({ href: `#${m.id}`, clase: ESTILO[m.id].clase, texto: m.codigo, id: m.id, titulo: m.nombre }));
+  botones.push({ href: "#oficiales", clase: "c-azul", texto: "Autoevaluaciones", id: "oficiales", titulo: "Autoevaluaciones oficiales de la plataforma" });
+  botones.push({ href: "#fallos", clase: "c-rojo", texto: "Repasar fallos", id: "fallos", titulo: "Unidades con preguntas falladas" });
+  document.getElementById("botonera").innerHTML = botones.map((b) => `
+    <a class="neon ${b.clase}" href="${b.href}" title="${esc(b.titulo)}" aria-pressed="${vista === b.id}">${esc(b.texto)}</a>`).join("");
+}
 
-// --- Vistas -------------------------------------------------------------
+function pintarFranja() {
+  document.getElementById("franja").innerHTML = INDICE.modulos.map((m) => {
+    const hechas = m.unidades.filter((u) => superada(u.id)).length;
+    return `
+      <a class="medidor" href="#${m.id}" style="--color:${ESTILO[m.id].color}">
+        <div class="fila"><span>${esc(m.nombre)}</span><strong>${hechas}/${m.unidades.length}</strong></div>
+        <div class="barra"><span style="width:${(hechas / m.unidades.length) * 100}%"></span></div>
+      </a>`;
+  }).join("");
+}
 
-function vistaInicio() {
-  const total = INDICE.modulos.reduce((n, m) => n + m.unidades.length, 0);
-  app.innerHTML = `
-    <h1>Elige un módulo</h1>
-    <p class="sub">${INDICE.modulos.length} módulos · ${total} unidades · 60 preguntas por unidad en 2 exámenes de 30, más la autoevaluación oficial de la plataforma.</p>
-    <div class="rejilla">
-      ${INDICE.modulos.map((m) => `
-        <a class="tarjeta" href="#/m/${m.id}">
-          <span class="etiqueta">${esc(m.codigo)}</span>
-          <h3>${esc(m.nombre)}</h3>
-          <p>${m.unidades.filter((u) => INDICE.listas.includes(u.id)).length} de ${m.unidades.length} unidades disponibles</p>
-        </a>`).join("")}
-    </div>`;
+// Lanzador: asignatura → unidad → tipo de examen.
+const selModulo = document.getElementById("sel-modulo");
+const selUnidad = document.getElementById("sel-unidad");
+const selTipo = document.getElementById("sel-tipo");
+const empezar = document.getElementById("empezar");
+
+function rellenarLanzador(idModulo) {
+  selModulo.innerHTML = INDICE.modulos.map((m) => `<option value="${m.id}">${esc(m.codigo)} · ${esc(m.nombre)}</option>`).join("");
+  if (idModulo) selModulo.value = idModulo;
+  rellenarUnidades();
+}
+function rellenarUnidades() {
+  const m = INDICE.modulos.find((x) => x.id === selModulo.value);
+  selUnidad.innerHTML = m.unidades.filter((u) => estaLista(u.id))
+    .map((u) => `<option value="${u.id}">U${u.n} · ${esc(u.titulo)}</option>`).join("");
+  rellenarTipos();
+}
+function rellenarTipos() {
+  selTipo.innerHTML = tipos(selUnidad.value).map((t) =>
+    `<option value="${t.modo}">${esc(t.nombre)}${t.modo === "fallos" ? ` (${nFallos(selUnidad.value)})` : ""}${t.nota !== undefined ? ` · mejor ${t.nota.toFixed(2)}` : ""}</option>`).join("");
+  empezar.href = enlace(selUnidad.value, selTipo.value);
+}
+selModulo.addEventListener("change", rellenarUnidades);
+selUnidad.addEventListener("change", rellenarTipos);
+selTipo.addEventListener("change", () => { empezar.href = enlace(selUnidad.value, selTipo.value); });
+
+function botonExamen(id, t) {
+  const clase = { "1": "c-violeta", "2": "c-violeta", azar: "c-cian", oficial: "c-azul", fallos: "c-rojo" }[t.modo];
+  const detalle = t.modo === "fallos" ? `${nFallos(id)} preguntas`
+    : t.nota !== undefined ? `Mejor nota ${t.nota.toFixed(2)}` : t.modo === "oficial" ? "10 preguntas reales" : "30 preguntas";
+  return `<a class="neon ${clase}" href="${enlace(id, t.modo)}">${esc(t.nombre)}<small>${esc(detalle)}</small></a>`;
+}
+
+function resumenUnidad(id) {
+  const n = mejores();
+  const nota = (modo) => (`${id}/${modo}` in n ? n[`${id}/${modo}`].toFixed(1) : "—");
+  const partes = [`E1 ${nota("1")}`, `E2 ${nota("2")}`];
+  if (esOficial(id)) partes.push(`Oficial ${nota("oficial")}`);
+  if (nFallos(id)) partes.push(`${nFallos(id)} fallos`);
+  return (superada(id) ? "✔ Superada · " : "") + partes.join(" · ");
 }
 
 function vistaModulo(idModulo) {
-  const m = INDICE.modulos.find((x) => x.id === idModulo);
-  if (!m) return vistaInicio();
-  const notas = mejores();
-  const nFallos = fallos();
-  const nota = (clave) => (clave in notas ? `<span class="nota-mini">${notas[clave].toFixed(1)}</span>` : "");
+  const m = INDICE.modulos.find((x) => x.id === idModulo) || INDICE.modulos[0];
+  const color = ESTILO[m.id].color;
+  const abierta = almacen.leer("sti-abierta", null);
   app.innerHTML = `
-    <div class="miga"><a href="#/">Inicio</a> › ${esc(m.nombre)}</div>
-    <h1>${esc(m.nombre)}</h1>
-    <p class="sub">Haz cada examen tantas veces como quieras. Se guarda tu mejor nota en este navegador.</p>
-    <div class="unidades">
-      ${m.unidades.map((u) => {
-        const fu = (nFallos[u.id] || []).length;
-        if (!INDICE.listas.includes(u.id)) return `
-        <div class="tarjeta unidad pendiente">
-          <div class="info">
-            <span class="etiqueta">Unidad ${u.n}</span>
-            <h3>${esc(u.titulo)}</h3>
-          </div>
-          <span class="nota-mini">En preparación</span>
-        </div>`;
-        return `
-        <div class="tarjeta unidad">
-          <div class="info">
-            <span class="etiqueta">Unidad ${u.n}</span>
-            <h3>${esc(u.titulo)}</h3>
-          </div>
-          <div class="acciones">
-            <a class="boton" href="#/t/${u.id}/1">Examen 1 ${nota(u.id + "/1")}</a>
-            <a class="boton" href="#/t/${u.id}/2">Examen 2 ${nota(u.id + "/2")}</a>
-            <a class="boton" href="#/t/${u.id}/azar">Aleatorio ${nota(u.id + "/azar")}</a>
-            ${esOficial(u.id) ? `<a class="boton" href="#/t/${u.id}/oficial">Autoevaluación oficial ${nota(u.id + "/oficial")}</a>` : ""}
-            ${fu ? `<a class="boton" href="#/t/${u.id}/fallos">Repasar fallos (${fu})</a>` : ""}
-          </div>
-        </div>`;
-      }).join("")}
-    </div>`;
-}
-
-async function vistaTest(idUnidad, modo) {
-  const encontrado = buscar(idUnidad);
-  if (!encontrado || !INDICE.listas.includes(idUnidad)) return vistaInicio();
-  const { modulo, unidad } = encontrado;
-  app.innerHTML = `<p class="sub">Cargando preguntas…</p>`;
-  // Cada pregunta lleva su "clave" para la lista de fallos: número en el banco normal, "o<n>" en la oficial.
-  let banco = [], oficial = [];
-  try {
-    if (modo !== "oficial") banco = await cargarUnidad(idUnidad);
-    if (esOficial(idUnidad) && (modo === "oficial" || modo === "fallos")) oficial = await cargarUnidad(idUnidad + "_oficial");
-  } catch (err) {
-    app.innerHTML = `<p class="sub">${esc(err.message)}. <a href="#/m/${modulo.id}">Volver</a></p>`;
-    return;
-  }
-  const delBanco = (i) => banco[i] && { q: normalizar(banco[i]), clave: i };
-  const delOficial = (i) => oficial[i] && { q: normalizar(oficial[i]), clave: "o" + i };
-
-  let seleccion;
-  if (modo === "1") seleccion = banco.slice(0, POR_EXAMEN).map((_, i) => delBanco(i));
-  else if (modo === "2") seleccion = banco.slice(POR_EXAMEN, POR_EXAMEN * 2).map((_, i) => delBanco(POR_EXAMEN + i));
-  else if (modo === "oficial") seleccion = oficial.map((_, i) => delOficial(i));
-  else if (modo === "fallos") seleccion = (fallos()[idUnidad] || [])
-    .map((k) => (String(k).startsWith("o") ? delOficial(Number(String(k).slice(1))) : delBanco(k))).filter(Boolean);
-  else seleccion = barajar(banco.map((_, i) => delBanco(i))).slice(0, POR_EXAMEN);
-  if (!seleccion.length) return vistaModulo(modulo.id);
-
-  const nombreModo = { "1": "Examen 1", "2": "Examen 2", azar: "Aleatorio", oficial: "Autoevaluación oficial", fallos: "Repaso de fallos" }[modo] || "Test";
-  const preguntas = barajar(seleccion).map(({ q, clave }) => {
-    const opciones = ordenarOpciones(q.o, q.c);
-    return { q, indice: clave, opciones, correcta: q.o[q.c], elegida: null };
-  });
-  let actual = 0;
-
-  function pintar() {
-    const item = preguntas[actual];
-    const respondida = item.elegida !== null;
-    const contestadas = preguntas.filter((x) => x.elegida !== null).length;
-    app.innerHTML = `
-      <div class="miga"><a href="#/">Inicio</a> › <a href="#/m/${modulo.id}">${esc(modulo.nombre)}</a> › U${unidad.n}</div>
-      <div class="cabecera-test"><span>${esc(unidad.titulo)} · ${nombreModo}</span><span>Pregunta ${actual + 1} de ${preguntas.length}</span></div>
-      <div class="progreso"><span style="width:${(contestadas / preguntas.length) * 100}%"></span></div>
-      <div class="tarjeta pregunta">
-        <h2>${esc(item.q.p)}</h2>
-        <div class="opciones">
-          ${item.opciones.map((o, i) => {
-            let clase = "";
-            if (respondida && o.correcta) clase = "ok";
-            else if (respondida && i === item.elegida) clase = "mal";
-            return `<button class="opcion ${clase}" data-i="${i}" ${respondida ? "disabled" : ""}>
-              <span class="letra">${"ABCD"[i]}</span><span>${esc(o.texto)}</span></button>`;
-          }).join("")}
-        </div>
-        ${respondida ? (() => {
-          const acierto = item.opciones[item.elegida].correcta;
-          return `<div class="explicacion ${acierto ? "es-ok" : "es-mal"}">
-            <strong>${acierto ? "✓ ¡Correcto!" : `✗ Incorrecto. La respuesta correcta es: ${esc(item.correcta)}`}</strong>
-            ${item.q.e ? `<p>${esc(item.q.e)}</p>` : ""}
-          </div>`;
-        })() : ""}
-      </div>
-      <div class="navegacion">
-        <button class="boton" id="ant" ${actual === 0 ? "disabled" : ""}>← Anterior</button>
-        ${actual < preguntas.length - 1
-          ? `<button class="boton primario" id="sig">Siguiente →</button>`
-          : `<button class="boton primario" id="fin">Ver resultado</button>`}
-      </div>`;
-    app.querySelectorAll(".opcion").forEach((b) => b.addEventListener("click", () => {
-      item.elegida = Number(b.dataset.i);
-      pintar();
-    }));
-    app.querySelector("#ant")?.addEventListener("click", () => { actual--; pintar(); });
-    app.querySelector("#sig")?.addEventListener("click", () => { actual++; pintar(); });
-    app.querySelector("#fin")?.addEventListener("click", terminar);
-  }
-
-  function terminar() {
-    const aciertos = preguntas.filter((x) => x.elegida !== null && x.opciones[x.elegida].correcta);
-    const malas = preguntas.filter((x) => !aciertos.includes(x));
-    const nota = (aciertos.length / preguntas.length) * 10;
-
-    const clave = `${idUnidad}/${modo}`;
-    const notas = mejores();
-    if (modo !== "fallos" && (!(clave in notas) || nota > notas[clave])) {
-      notas[clave] = nota;
-      almacen.guardar("sti-mejores", notas);
-    }
-    // Lista de fallos de la unidad: se añaden los nuevos y se quitan los acertados.
-    const todos = fallos();
-    const set = new Set(todos[idUnidad] || []);
-    malas.forEach((x) => set.add(x.indice));
-    aciertos.forEach((x) => set.delete(x.indice));
-    todos[idUnidad] = [...set];
-    almacen.guardar("sti-fallos", todos);
-
-    app.innerHTML = `
-      <div class="miga"><a href="#/">Inicio</a> › <a href="#/m/${modulo.id}">${esc(modulo.nombre)}</a> › U${unidad.n}</div>
-      <div class="tarjeta resultado">
-        <span class="etiqueta">${esc(unidad.titulo)} · ${nombreModo}</span>
-        <div class="nota ${nota >= 5 ? "aprobado" : "suspenso"}">${nota.toFixed(1)}</div>
-        <p class="sub">${aciertos.length} de ${preguntas.length} aciertos</p>
-        <div class="acciones" style="justify-content:center">
-          <button class="boton primario" id="otra">Repetir</button>
-          <a class="boton" href="#/m/${modulo.id}">Volver al módulo</a>
+    <section class="panel" style="--color:${color}" aria-labelledby="t-mod">
+      <div class="modulo-cab">
+        <span class="etiqueta">${esc(m.codigo)}</span>
+        <h2 id="t-mod">${esc(m.nombre)}</h2>
+        <div class="acciones-mod">
+          <button class="neon c-gris mini" id="abrir-todas" type="button">Abrir todas</button>
+          <button class="neon c-gris mini" id="cerrar-todas" type="button">Cerrar todas</button>
         </div>
       </div>
-      ${malas.length ? `<h2>Preguntas a repasar (${malas.length})</h2>
-      <div class="repaso">
-        ${malas.map((x) => `
-          <div class="tarjeta">
-            <h3>${esc(x.q.p)}</h3>
-            ${x.elegida !== null ? `<div class="tuya">✗ Tu respuesta: ${esc(x.opciones[x.elegida].texto)}</div>` : `<div class="tuya">✗ Sin responder</div>`}
-            <div class="buena">✓ Correcta: ${esc(x.correcta)}</div>
-            ${x.q.e ? `<div class="por-que">${esc(x.q.e)}</div>` : ""}
-          </div>`).join("")}
-      </div>` : ""}`;
-    app.querySelector("#otra").addEventListener("click", () => vistaTest(idUnidad, modo));
-    window.scrollTo(0, 0);
-  }
-
-  pintar();
+      ${m.unidades.map((u) => estaLista(u.id) ? `
+        <details class="unidad" data-id="${u.id}" ${abierta === u.id ? "open" : ""}>
+          <summary>
+            <span class="num">${u.n}</span>
+            <span class="tit"><strong>${esc(u.titulo)}</strong><small>${esc(resumenUnidad(u.id))}</small></span>
+            <span class="flecha" aria-hidden="true">▾</span>
+          </summary>
+          <div class="cuerpo"><div class="examenes">${tipos(u.id).map((t) => botonExamen(u.id, t)).join("")}</div></div>
+        </details>` : `
+        <details class="unidad" disabled>
+          <summary><span class="num">${u.n}</span><span class="tit"><strong>${esc(u.titulo)}</strong><small>En preparación</small></span><span></span></summary>
+        </details>`).join("")}
+    </section>`;
+  const todas = [...app.querySelectorAll("details.unidad[data-id]")];
+  todas.forEach((d) => d.addEventListener("toggle", () => { if (d.open) almacen.guardar("sti-abierta", d.dataset.id); }));
+  app.querySelector("#abrir-todas").addEventListener("click", () => todas.forEach((d) => { d.open = true; }));
+  app.querySelector("#cerrar-todas").addEventListener("click", () => todas.forEach((d) => { d.open = false; }));
+  rellenarLanzador(m.id);
 }
 
-// --- Rutas y tema -------------------------------------------------------
+// Listado de unidades de todas las asignaturas que cumplen un filtro (oficiales o con fallos).
+function vistaLista(titulo, ayuda, filtro, modo, detalle) {
+  const filas = INDICE.modulos.flatMap((m) => m.unidades.filter((u) => estaLista(u.id) && filtro(u.id)).map((u) => ({ m, u })));
+  app.innerHTML = `
+    <section class="panel">
+      <h2>${esc(titulo)}</h2>
+      <p class="ayuda">${esc(ayuda)}</p>
+      ${filas.length ? `<div class="fallos-lista">${filas.map(({ m, u }) => `
+        <div class="fallo" style="border-color:${ESTILO[m.id].color}55">
+          <span><strong>${esc(m.codigo)} · U${u.n}</strong> ${esc(u.titulo)}<br><small style="color:var(--muted)">${esc(detalle(u.id))}</small></span>
+          <a class="neon ${modo === "fallos" ? "c-rojo" : "c-azul"} mini" href="${enlace(u.id, modo)}">Empezar</a>
+        </div>`).join("")}</div>` : `<p class="vacio">No hay nada aquí todavía. Haz algún examen y vuelve.</p>`}
+    </section>`;
+  rellenarLanzador();
+}
 
 function enrutar() {
-  const partes = location.hash.replace(/^#\/?/, "").split("/");
-  if (partes[0] === "m") vistaModulo(partes[1]);
-  else if (partes[0] === "t") vistaTest(partes[1], partes[2]);
-  else vistaInicio();
-  window.scrollTo(0, 0);
+  const vista = location.hash.replace(/^#\/?/, "") || almacen.leer("sti-modulo", "M1");
+  pintarBotonera(vista);
+  pintarFranja();
+  if (vista === "fallos") {
+    vistaLista("Repasar fallos", "Unidades con preguntas falladas u omitidas. Al acertarlas en el repaso desaparecen de la lista.",
+      (id) => nFallos(id) > 0, "fallos", (id) => `${nFallos(id)} preguntas pendientes`);
+  } else if (vista === "oficiales") {
+    vistaLista("Autoevaluaciones oficiales", "Las 10 preguntas reales de la plataforma de cada unidad, con explicación.",
+      esOficial, "oficial", (id) => (`${id}/oficial` in mejores() ? `Mejor nota ${mejores()[`${id}/oficial`].toFixed(2)}` : "Sin hacer"));
+  } else {
+    const id = INDICE.modulos.some((m) => m.id === vista) ? vista : "M1";
+    almacen.guardar("sti-modulo", id);
+    vistaModulo(id);
+  }
 }
 window.addEventListener("hashchange", enrutar);
+// Al volver de un examen con el botón Atrás, actualiza notas y fallos.
+window.addEventListener("pageshow", (e) => { if (e.persisted) enrutar(); });
 enrutar();
-
-const raiz = document.documentElement;
-const temaGuardado = almacen.leer("sti-tema", null);
-if (temaGuardado) raiz.dataset.theme = temaGuardado;
-document.getElementById("tema").addEventListener("click", () => {
-  const oscuro = raiz.dataset.theme
-    ? raiz.dataset.theme === "dark"
-    : matchMedia("(prefers-color-scheme: dark)").matches;
-  raiz.dataset.theme = oscuro ? "light" : "dark";
-  almacen.guardar("sti-tema", raiz.dataset.theme);
-});

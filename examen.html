@@ -1,0 +1,787 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Examen · CFGS STI</title>
+    <style>
+    
+    /* General Setup & Mobile First */
+    :root{ --bg:#120e26;--panel:rgba(15,12,41,.88);--text:#e0e0e0;--muted:#b9b9c6;--cyan:#00ffff;--magenta:#c0f;--violet:#8e2de2;--blue:#1e90ff;--amber:#ffd700;--orange:#ffa500;--green:#00ff7f;--red:#ff4500; --shadow:0 0 15px rgba(0,255,255,.3),0 0 25px rgba(75,0,130,.4) } body{background-image:linear-gradient(30deg,rgba(0,220,220,.06) 12%,transparent 12.5%,transparent 87%,rgba(0,220,220,.06) 87.5%,rgba(0,220,220,.06)),linear-gradient(90deg,rgba(0,220,220,.08) 12%,transparent 12.5%,transparent 87%,rgba(0,220,220,.08) 87.5%,rgba(0,220,220,.08)),linear-gradient(-30deg,rgba(0,220,220,.06) 12%,transparent 12.5%,transparent 87%,rgba(0,220,220,.06) 87.5%,rgba(0,220,220,.06));background-size:44px 76px;background-attachment:fixed;}
+    html{scrollbar-width:none;scroll-behavior:smooth}
+    body::-webkit-scrollbar{display:none}
+    body{margin:0;padding:12px;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;min-height:100vh;display:flex;flex-direction:column;gap:18px;overflow-x:hidden}
+    aside#dashboard{order:2;background:transparent;border:0;border-radius:0;box-shadow:none;backdrop-filter:none;padding:0;display:flex;flex-direction:column;gap:14px}
+    aside#dashboard{scrollbar-width:thin;scrollbar-color:var(--cyan) rgba(10,8,30,.6)}aside#dashboard::-webkit-scrollbar{width:8px}aside#dashboard::-webkit-scrollbar-track{background:rgba(10,8,30,.6);border-radius:10px}aside#dashboard::-webkit-scrollbar-thumb{background-color:var(--cyan);border-radius:10px;border:2px solid transparent;background-clip:content-box}aside#dashboard::-webkit-scrollbar-thumb:hover{background-color:var(--violet)}
+    .card{border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;background:rgba(10,8,30,.6)}
+    .row{display:flex;gap:10px;align-items:center;justify-content:space-between}
+    .muted{color:var(--muted);font-size:.9rem}
+    .ring{width:120px;height:120px;margin:4px auto;position:relative}
+    .ring svg{transform:rotate(-90deg);width:120px;height:120px;display:block}
+    .ring .label{position:absolute;inset:0;display:grid;place-items:center;font-weight:800}
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .badge{border-radius:8px;padding:8px 10px;text-align:center;font-weight:800}
+    .ok{color:var(--green);border:1px solid rgba(0,255,127,.5);text-shadow:0 0 6px rgba(0,255,127,.6)}
+    .ko{color:var(--red);border:1px solid rgba(255,69,0,.5);text-shadow:0 0 6px rgba(255,69,0,.6)}
+    .sk{color:var(--amber);border:1px solid rgba(255,215,0,.5);text-shadow:0 0 6px rgba(255,215,0,.6)}
+    .sc{color:var(--cyan);border:1px solid rgba(0,255,255,.5);text-shadow:0 0 6px rgba(0,255,255,.6)}
+    .controls{display:none !important} .settings{display:none!important}
+    button{padding:10px 14px;font-size:.98rem;font-weight:800;border:none;border-radius:10px;color:#fff;cursor:pointer;transition:transform .15s,box-shadow .2s;text-shadow:0 0 5px rgba(255,255,255,.7);background:linear-gradient(145deg,#4a00e0,#8e2de2);box-shadow:0 4px 0 rgba(30,0,60,.8),0 6px 15px rgba(0,0,0,.4)}
+    button:hover{transform:translateY(-2px);box-shadow:0 4px 0 rgba(30,0,60,.8),0 6px 20px rgba(0,0,0,.5),0 0 15px var(--magenta),0 0 25px var(--magenta)}
+    .btn-blue{background:linear-gradient(145deg,#00bfff,#1e90ff)}.btn-amber{background:linear-gradient(145deg,#ff8c00,#ffa500)}.btn-red{background:linear-gradient(145deg,#ff4b2b,#ff416c)}
+    main{order:1;display:flex;justify-content:center;align-items:flex-start}
+    #quiz-container{background:var(--panel);padding:18px 14px;border-radius:15px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.3);width:100%;backdrop-filter:blur(6px);box-sizing:border-box}
+    h1{text-align:center;color:#fff;margin:0 0 8px;font-weight:900;letter-spacing:.4px;text-shadow:0 0 8px var(--primary-shadow,.7),0 0 12px var(--primary-shadow,.5);font-size:1.5rem;}
+    #live-stats-container{display:flex;flex-wrap:wrap;justify-content:space-around;gap:8px;border:1px solid rgba(255,255,255,.15);border-radius:8px;background:rgba(10,8,30,.7);padding:8px;margin-bottom:16px;font-size:.9rem}
+    #question-counter{font-size:.95rem;color:var(--cyan);text-align:right;margin:6px 0 10px;text-shadow:0 0 5px rgba(0,255,255,.5)}
+    #question-text{font-size:1.1rem;font-weight:800;margin-bottom:12px;color:#f5f5f5;text-shadow:1px 1px 2px rgba(0,0,0,.5)}
+    #options-container{display:grid;gap:10px;margin-bottom:10px}
+    .option{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid rgba(75,0,130,.7);border-radius:10px;cursor:pointer;background:rgba(48,43,99,.6);transition:.2s}
+    .option:hover{background:rgba(75,0,130,.7);border-color:var(--cyan);box-shadow:0 0 8px rgba(0,255,255,.4)}
+    .option input[type=radio]{accent-color:var(--cyan);transform:scale(1.2)}
+    #timer-bar{height:6px;border-radius:6px;background:rgba(255,255,255,.15);overflow:hidden;margin:6px 0 0}
+    #timer-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--cyan),var(--green));box-shadow:0 0 10px rgba(0,255,255,.6)}
+    #feedback-container{margin-top:10px;padding:14px;border-radius:10px;font-weight:800;border:2px solid transparent;box-shadow:0 0 10px rgba(255,255,255,.15)}
+    .feedback-correct{background:rgba(0,255,127,.12);border-color:var(--green);color:var(--green)}
+    .feedback-incorrect{background:rgba(255,69,0,.12);border-color:var(--red);color:var(--red)}
+    .feedback-skipped{background:rgba(255,215,0,.12);border-color:var(--amber);color:var(--amber)}
+    .feedback-explanation{font-weight:600;margin-top:10px;font-size:.95rem;color:#f0f0f0;text-shadow:none}
+    .feedback-fundamento{display:block;margin-top:6px}
+    #navigation-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:14px;align-items:center;}
+    .hidden{display:none!important}
+    .option.disabled{cursor:default;background:rgba(60,60,60,.6)!important;color:#aaa!important;border-color:#555!important;box-shadow:none!important}
+    #score-container{text-align:center;font-size:1.05rem;margin-top:10px;padding:18px;background:rgba(15,12,41,.9);border-radius:14px;border:1px solid var(--violet);box-shadow:0 0 15px rgba(142,45,226,.35)}
+    #final-score{display:inline-block;font-size:3.8rem;line-height:1;font-weight:900;margin:10px 0;text-shadow:0 0 16px currentColor,0 0 28px rgba(129,199,132,.45)}
+    #score-container p:has(#final-score){font-size:1.2rem;margin:14px 0 18px}
+    #score-breakdown{margin-top:12px;text-align:left;font-size:.95rem;max-height:none;overflow:visible;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:10px}
+    .navigator{display:grid;grid-template-columns:repeat(auto-fill,minmax(36px,1fr));gap:6px;margin:8px 0 12px}
+    .pill{font-size:.9rem;padding:6px;border-radius:8px;text-align:center;border:1px solid rgba(255,255,255,.12);background:rgba(20,16,48,.6);color:var(--muted)}
+    .pill.ok{color:var(--green);border-color:rgba(0,255,127,.4)}.pill.ko{color:var(--red);border-color:rgba(255,69,0,.4)}.pill.sk{color:var(--amber);border-color:rgba(255,215,0,.4)}.pill.cur{outline:2px solid var(--cyan);color:#fff}
+    .toast{position:fixed;bottom:16px;right:16px;background:rgba(20,16,48,.95);color:var(--text);border:1px solid rgba(0,255,255,.35);border-radius:10px;padding:10px 12px;box-shadow:var(--shadow);z-index:99}
+    #final-overlay{position:fixed;inset:0;background:radial-gradient(1200px 600px at 50% 10%,rgba(0,255,255,.25),transparent 60%),radial-gradient(1200px 600px at 50% 90%,rgba(193,53,132,.25),transparent 60%),rgba(8,6,24,.96);display:grid;place-items:center;z-index:200;padding:12px}
+    #final-card{border:1px solid rgba(0,255,255,.5);border-radius:18px;padding:24px 16px;background:rgba(15,12,41,.88);box-shadow:0 0 30px rgba(0,255,255,.2),0 0 45px rgba(193,53,132,.18);text-align:center;max-width:720px;width:min(92%,720px)}
+    #final-title{font-size:1.8rem;font-weight:900;letter-spacing:.4px;text-shadow:0 0 12px rgba(0,255,255,.7)}
+    #final-score-big{font-size:3.5rem;font-weight:900;margin:6px 0 12px}
+    #final-msg{color:var(--muted);margin-bottom:14px}
+    #final-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+    .grade-green{color:var(--green);text-shadow:0 0 18px rgba(0,255,127,.6)}.grade-cyan{color:var(--cyan);text-shadow:0 0 18px rgba(0,255,255,.6)}.grade-amber{color:var(--amber);text-shadow:0 0 18px rgba(255,215,0,.6)}.grade-red{color:var(--red);text-shadow:0 0 18px rgba(255,69,0,.6)}
+    .confetti{position:fixed;top:-10px;width:8px;height:14px;opacity:.9;transform:rotate(15deg);z-index:201}
+    @keyframes fallConfetti{to{transform:translateY(110vh) rotate(360deg)}}
+    
+    .option.option-correct{background:rgba(0,255,127,.15)!important;border-color:var(--green)!important;box-shadow:0 0 8px rgba(0,255,127,.5)!important}
+    .option.option-incorrect{background:rgba(255,69,0,.15)!important;border-color:var(--red)!important}
+    .breakdown-item{padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,.1)}.breakdown-item:last-child{border-bottom:none;margin-bottom:0}
+    .breakdown-item .q-text{font-weight:700;color:#fff;margin-bottom:8px}
+    .breakdown-item .chosen-ans{color:var(--red)}
+    .breakdown-item .correct-ans{color:var(--green)}
+    .breakdown-item .explanation{font-size:.9rem;color:var(--muted);margin-top:8px;background:rgba(0,0,0,.2);padding:8px;border-radius:6px}
+    #score-breakdown h3{margin:0 0 10px;color:var(--cyan);border-bottom:1px solid var(--cyan);padding-bottom:5px}
+
+
+
+    .agente-test-toolbar{display:flex;justify-content:flex-start;margin:0 0 12px}
+    .agente-home-link{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border:1px solid rgba(0,255,255,.55);border-radius:10px;color:#fff;text-decoration:none;font-size:.9rem;font-weight:850;letter-spacing:.08em;background:linear-gradient(135deg,rgba(0,191,255,.2),rgba(142,45,226,.28));box-shadow:0 0 12px rgba(0,255,255,.16);transition:transform .15s,box-shadow .2s,border-color .2s}
+    .agente-home-link:hover{transform:translateY(-2px);border-color:var(--cyan);box-shadow:0 0 18px rgba(0,255,255,.4)}
+    .agente-home-link:focus-visible{outline:2px solid var(--amber);outline-offset:3px}
+
+    
+    /* Help Button Styles - Inline and Elegant */
+    .btn-help {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 10px 18px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+        text-decoration: none;
+        font-weight: 800;
+        font-size: .98rem;
+        transition: transform .2s, box-shadow .2s;
+        border: 1px solid rgba(255,255,255,0.1);
+        cursor: pointer;
+    }
+    .btn-help:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(118, 75, 162, 0.6);
+        color: #fff;
+    }
+    .btn-help svg { width: 20px; height: 20px; }
+
+    /* Desktop Layout */
+    @media (min-width:980px){
+        body{padding:18px;min-height:100vh;overflow-y:auto;display:grid;grid-template-columns:320px 1fr}
+        aside#dashboard{order:initial;overflow-y:auto}
+        main{order:initial}
+        #quiz-container{padding:22px 18px}
+        h1{font-size:1.7rem}
+        #question-text{font-size:1.2rem}
+        #final-card{padding:28px 24px}
+        #final-title{font-size:2.2rem}
+        #final-score-big{font-size:4rem}
+    }
+    
+    @media print{body{background:none;display:block;padding:0}aside#dashboard{display:none}#quiz-container{box-shadow:none;border:0}#final-overlay{display:none!important}.btn-help{display:none}}
+    #export-csv-final,#export-json-final,#ovl-export-csv,#ovl-export-json{display:none!important}
+
+    :root{--bg:#1a2b23;--panel:rgba(18,30,22,.88);--text:#d5e0d8;--muted:#a0b0a8;--cyan:#66bb6a;--magenta:#81c784;--violet:#4caf50;--blue:#2e7d32;--amber:#a5d6a7;--orange:#ffb74d;--green:#81c784;--red:#e57373;--shadow:0 0 15px rgba(102,187,106,.3),0 0 25px rgba(46,125,50,.4);} body{background-image:radial-gradient(rgba(120, 200, 120, 0.1) 1px, transparent 1.2px);background-size: 15px 15px;background-attachment:fixed;}
+  
+    /* Identidad visual exclusiva para evaluaciones: ciruela, cian y ámbar. */
+    :root{
+      --bg:#160d1d;
+      --panel:rgba(37,18,47,.94);
+      --text:#f7eef9;
+      --muted:#cbbbd1;
+      --cyan:#62e7f2;
+      --magenta:#ff55c8;
+      --violet:#9b63f4;
+      --blue:#4d8dff;
+      --amber:#ffc857;
+      --orange:#ff8a45;
+      --green:#63e69a;
+      --red:#ff667d;
+      --shadow:0 0 18px rgba(255,85,200,.20),0 0 30px rgba(98,231,242,.14);
+    }
+    body{
+      background-color:var(--bg);
+      background-image:
+        linear-gradient(rgba(255,200,87,.035) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(98,231,242,.04) 1px,transparent 1px),
+        radial-gradient(circle at 18% 10%,rgba(155,99,244,.16),transparent 32%),
+        radial-gradient(circle at 82% 0,rgba(255,85,200,.10),transparent 28%);
+      background-size:28px 28px,28px 28px,auto,auto;
+      background-attachment:fixed;
+    }
+    #quiz-container{
+      border-color:rgba(255,200,87,.34);
+      box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.05);
+    }
+    h1{color:#fff7dc;text-shadow:0 0 10px rgba(255,200,87,.34);}
+    #live-stats-container,.card{background:rgba(20,10,29,.72);}
+    .option{
+      background:rgba(70,37,86,.72);
+      border-color:rgba(155,99,244,.56);
+    }
+    .option:hover{
+      background:rgba(91,47,109,.82);
+      border-color:var(--amber);
+      box-shadow:0 0 10px rgba(255,200,87,.30);
+    }
+    #timer-fill{
+      background:linear-gradient(90deg,var(--magenta),var(--amber));
+      box-shadow:0 0 10px rgba(255,85,200,.42);
+    }
+
+  </style>
+</head>
+<body>
+  <aside id="dashboard" aria-label="Panel de control del examen">
+    <div class="card">
+        <div class="ring" aria-hidden="true">
+            <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="10"></circle><circle id="ring-progress" cx="60" cy="60" r="52" fill="none" stroke="var(--cyan)" stroke-width="10" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327" style="filter:drop-shadow(0 0 6px var(--primary-shadow, .8))"></circle></svg>
+            <div class="label"><span id="ring-label">0%</span></div>
+        </div>
+        <div class="row"><span class="muted">Pregunta</span><strong id="ring-step">1 / 0</strong></div>
+        <div class="row"><span class="muted">Precisión</span><strong id="ring-acc">0%</strong></div>
+</div>
+    <div class="card">
+      <div class="stat-grid">
+        <div class="badge ok">Aciertos <span id="s-ok">0</span></div>
+        <div class="badge ko">Fallos <span id="s-ko">0</span></div>
+        <div class="badge sk">Omitidas <span id="s-sk">0</span></div>
+        <div class="badge sc">Puntuación <span id="s-sc">0.00</span></div>
+      </div>
+    </div>
+    <div class="card">
+        <div id="mini-nav" class="navigator" aria-label="Estado de preguntas"></div>
+    </div>
+  </aside>
+
+  <main>
+    <section id="quiz-container" role="region" aria-label="Examen">
+      <nav class="agente-test-toolbar" aria-label="Navegacion del test">
+        <a class="agente-home-link" href="index.html" aria-label="Volver al inicio del plan de estudio">⌂ INICIO</a>
+      </nav>
+      <h1>Examen</h1>
+      <p id="exam-sub" class="muted" style="text-align:center;margin:-2px 0 12px"></p>
+      <div id="live-stats-container" aria-live="polite">
+        <span class="stat-item">Aciertos: <strong id="live-correct" class="stat-correct">0</strong></span>
+        <span class="stat-item">Fallos: <strong id="live-incorrect" class="stat-incorrect">0</strong></span>
+        <span class="stat-item">Omitidas: <strong id="live-skipped" class="stat-skipped">0</strong></span>
+        <span class="stat-item">Puntuación: <strong id="live-score" class="stat-score">0.00</strong></span>
+      </div>
+      <div id="question-counter"></div>
+      <div id="question-text"></div>
+      <div id="options-container" role="radiogroup" aria-label="Opciones de respuesta"></div>
+      <div id="timer-bar" class="hidden"><div id="timer-fill"></div></div>
+      <div id="feedback-container" class="hidden" aria-live="polite"></div>
+      <div id="navigation-buttons">
+        <button id="submit-btn">Responder</button>
+        <button id="skip-btn" class="btn-amber">Pasar Pregunta</button>
+        <button id="next-btn" class="hidden btn-blue">Siguiente Pregunta</button>
+        <button id="restart-btn" class="hidden btn-blue">Reiniciar Examen</button>
+        
+
+      </div>
+      <div id="score-container" class="hidden" aria-live="polite">
+        <h2>¡Examen finalizado!</h2>
+        <p>Aciertos: <strong id="counts-correct">0</strong></p>
+        <p>Fallos: <strong id="counts-incorrect">0</strong></p>
+        <p>Omitidas: <strong id="counts-skipped">0</strong></p>
+        <p>Tu puntuación final es: <strong id="final-score">0.00</strong></p>
+        <div id="score-breakdown"></div>
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <button id="restart-btn-2">Reiniciar</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="final-overlay" class="hidden" role="dialog" aria-modal="true">
+    <div id="final-card">
+      <div id="final-title">Resultado del examen</div>
+      <div id="final-score-big" class="grade-cyan">0.00</div>
+      <div id="final-msg">Buen trabajo.</div>
+      <div id="final-actions">
+        <a class="agente-home-link" href="index.html">⌂ INICIO</a>
+        <button id="ovl-restart" class="btn-red">Reiniciar</button>
+        <button id="ovl-close">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden" role="status"></div>
+  <script src="data/indice.js"></script>
+  <script src="comun.js"></script>
+  <script>
+    // Parámetros: ?u=M1_U01&t=1|2|azar|oficial|fallos. Se cargan los archivos de la unidad antes del examen.
+    const PARAM = new URLSearchParams(location.search);
+    const UNIDAD = PARAM.get("u") || "";
+    const MODO = MODOS[PARAM.get("t")] ? PARAM.get("t") : "1";
+    const ENCONTRADO = buscar(UNIDAD);
+    if (ENCONTRADO && estaLista(UNIDAD)) {
+      if (MODO !== "oficial") document.write('<script src="data/' + UNIDAD + '.js"><\/script>');
+      if (esOficial(UNIDAD) && (MODO === "oficial" || MODO === "fallos")) document.write('<script src="data/' + UNIDAD + '_oficial.js"><\/script>');
+    }
+  </script>
+  <script>
+
+    // Cada pregunta guarda su "clave" para la lista de fallos: número en el banco normal, "o<n>" en la oficial.
+    function construirExamen(){
+      if(!ENCONTRADO || !estaLista(UNIDAD)) return null;
+      const banco=BANCO[UNIDAD]||[], oficial=BANCO[UNIDAD+"_oficial"]||[];
+      const delBanco=i=>banco[i]&&{q:normalizar(banco[i]),clave:i};
+      const delOficial=i=>oficial[i]&&{q:normalizar(oficial[i]),clave:"o"+i};
+      let sel;
+      if(MODO==="1") sel=banco.slice(0,POR_EXAMEN).map((_,i)=>delBanco(i));
+      else if(MODO==="2") sel=banco.slice(POR_EXAMEN,POR_EXAMEN*2).map((_,i)=>delBanco(POR_EXAMEN+i));
+      else if(MODO==="oficial") sel=oficial.map((_,i)=>delOficial(i));
+      else if(MODO==="fallos") sel=(fallos()[UNIDAD]||[]).map(k=>String(k).startsWith("o")?delOficial(Number(String(k).slice(1))):delBanco(k)).filter(Boolean);
+      else sel=barajar(banco.map((_,i)=>delBanco(i))).slice(0,POR_EXAMEN);
+      if(MODO!=="oficial") sel=barajar(sel);
+      if(!sel.length) return null;
+      const {modulo,unidad}=ENCONTRADO;
+      const titulo=modulo.codigo+" · U"+unidad.n+" · "+MODOS[MODO].toUpperCase();
+      document.querySelector("h1").textContent=titulo;
+      document.title=titulo+" · Examen Online";
+      document.getElementById("exam-sub").textContent=unidad.titulo;
+      document.querySelectorAll(".agente-home-link").forEach(a=>a.href="index.html#"+modulo.id);
+      return sel.map(({q,clave},id)=>{
+        const opciones=ordenarOpciones(q.o,q.c);
+        return {id,clave,question:q.p,options:opciones.map(o=>o.texto),correctAnswer:opciones.findIndex(o=>o.correcta),explanation:q.e||""};
+      });
+    }
+
+    
+
+    let quizData=construirExamen()||[{question:"No hay preguntas para este examen. Vuelve al inicio y elige otro.",options:["Volver al inicio"],correctAnswer:0,explanation:""}];
+    const settings={penaltyMode:"auto",customT:3,timerEnabled:false,timerSeconds:60,shuffleQ:false,shuffleO:false,autoExplain:true};
+    const maxScore=10,totalQuestions=quizData.length,storageKey="exam-progress:"+document.title.toLowerCase().replace(/[^a-z0-9]+/gi,"-");
+    const quizSignature=JSON.stringify(quizData.map(item=>({q:item.question,options:item.options,correct:item.correctAnswer})));
+    let order=Array.from({length:totalQuestions},(_,index)=>index),currentQuestionIndex=0,correctCount=0,incorrectCount=0,skippedCount=0,results=[],qStartTime=null,countdown=null,timeLeft=settings.timerSeconds,reviewMode=false;
+    const $=selector=>document.querySelector(selector),$$=selector=>Array.from(document.querySelectorAll(selector));
+
+    const questionCounterEl=$("#question-counter"),questionTextEl=$("#question-text"),optionsContainerEl=$("#options-container"),feedbackContainerEl=$("#feedback-container"),submitBtn=$("#submit-btn"),skipBtn=$("#skip-btn"),nextBtn=$("#next-btn"),scoreContainerEl=$("#score-container"),finalScoreEl=$("#final-score"),correctCountsEl=$("#counts-correct"),incorrectCountsEl=$("#counts-incorrect"),skippedCountsEl=$("#counts-skipped"),finalOverlay=$("#final-overlay"),finalScoreBig=$("#final-score-big"),finalMsg=$("#final-msg");
+
+    function toast(message,duration=1800){
+      const node=$("#toast");
+      if(!node) return;
+      node.textContent=message;
+      node.classList.remove("hidden");
+      setTimeout(()=>node.classList.add("hidden"),duration);
+    }
+    function shuffleInPlace(items){
+      for(let index=items.length-1;index>0;index--){
+        const swap=Math.floor(Math.random()*(index+1));
+        [items[index],items[swap]]=[items[swap],items[index]];
+      }
+    }
+    function getPenaltyT(){
+      return settings.penaltyMode==="manual"?Math.max(1,Number(settings.customT||3)):totalQuestions===30?3:totalQuestions===20?4:totalQuestions===10?6:3;
+    }
+    function computeLiveScore(){
+      const raw=Math.max(0,correctCount-incorrectCount/getPenaltyT());
+      return Math.min(maxScore,raw/totalQuestions*maxScore);
+    }
+    function currentQ(){return quizData[order[currentQuestionIndex]]}
+    function currentOriginalIndex(){return order[currentQuestionIndex]}
+    function normalizeExplanation(text){
+      const clean=String(text||"").trim();
+      return clean.replace(/^explicaci[oó]n:\s*/i,"");
+    }
+    function escapeHtml(value){
+      return String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
+    }
+    function formatExplanation(text){
+      return escapeHtml(normalizeExplanation(text)).replace(/fundamento:/gi,'<br><span class="feedback-fundamento"><strong>Fundamento:</strong></span>');
+    }
+    function getResultForQuestion(originalIndex){
+      return results.find(result=>result.qIndex===originalIndex)||null;
+    }
+    function saveProgress(){
+      try{
+        localStorage.setItem(storageKey,JSON.stringify({signature:quizSignature,order,currentQuestionIndex,results,reviewMode}));
+      }catch(error){}
+    }
+    function restoreProgress(){
+      clearProgress();
+      return false;
+    }
+    function clearProgress(){
+      try{localStorage.removeItem(storageKey)}catch(error){}
+    }
+    function recalculateCounts(){
+      correctCount=results.filter(result=>result.outcome==="ok").length;
+      incorrectCount=results.filter(result=>result.outcome==="ko").length;
+      skippedCount=results.filter(result=>result.outcome==="sk").length;
+    }
+    function updateRing(){
+      const answered=correctCount+incorrectCount+skippedCount;
+      const progress=Math.max(0,Math.min(1,answered/totalQuestions));
+      const circumference=326.728;
+      $("#ring-progress")?.setAttribute("stroke-dashoffset",(circumference-circumference*progress).toFixed(2));
+      if($("#ring-label")) $("#ring-label").textContent=Math.round(100*progress)+"%";
+      if($("#ring-step")) $("#ring-step").textContent=(currentQuestionIndex+1)+" / "+order.length;
+      if($("#ring-acc")) $("#ring-acc").textContent=Math.round(100*(answered?correctCount/answered:0))+"%";
+      if($("#ring-T")) $("#ring-T").textContent=getPenaltyT();
+      if($("#ring-time")) $("#ring-time").textContent=settings.timerEnabled?String(timeLeft)+"s":"?";
+    }
+    function updateMiniNav(){
+      const nav=$("#mini-nav");
+      if(!nav) return;
+      nav.innerHTML="";
+      order.forEach((originalIndex,visibleIndex)=>{
+        const pill=document.createElement("button");
+        pill.type="button";
+        pill.className="pill";
+        pill.textContent=String(visibleIndex+1);
+        pill.setAttribute("aria-label","Ir a la pregunta "+(visibleIndex+1));
+        const result=getResultForQuestion(originalIndex);
+        if(result) pill.classList.add(result.outcome==="ok"?"ok":result.outcome==="ko"?"ko":"sk");
+        if(visibleIndex===currentQuestionIndex) pill.classList.add("cur");
+        pill.addEventListener("click",()=>goToQuestion(visibleIndex));
+        nav.appendChild(pill);
+      });
+    }
+    function updateLiveStatsBars(){
+      const score=computeLiveScore();
+      $("#live-correct").textContent=correctCount;
+      $("#live-incorrect").textContent=incorrectCount;
+      $("#live-skipped").textContent=skippedCount;
+      $("#live-score").textContent=score.toFixed(2);
+      $("#s-ok").textContent=correctCount;
+      $("#s-ko").textContent=incorrectCount;
+      $("#s-sk").textContent=skippedCount;
+      $("#s-sc").textContent=score.toFixed(2);
+    }
+    function prepareQuestionOptions(question){
+      if(!question._order){
+        question._order=question.options.map((_,index)=>index);
+        if(settings.shuffleO) shuffleInPlace(question._order);
+      }
+      return question._order;
+    }
+    function selectedVisibleIndex(){
+      const checked=$('#options-container input[name="answer"]:checked');
+      return checked?Number(checked.value):null;
+    }
+    function disableOptions(){
+      $$('#options-container input[type="radio"]').forEach(input=>input.disabled=true);
+      $$("#options-container .option").forEach(option=>option.classList.add("disabled"));
+    }
+    function applyStoredResult(){
+      const result=getResultForQuestion(currentOriginalIndex());
+      if(!result) return false;
+      const visibleChosen=result.chosen==null?null:currentQ()._order.indexOf(result.chosen);
+      if(visibleChosen!==null && visibleChosen>=0){
+        const input=$("#opt"+visibleChosen);
+        if(input) input.checked=true;
+      }
+      showFeedback(result.outcome==="ok",result.outcome==="sk",visibleChosen,false);
+      return true;
+    }
+    function loadQuestion(){
+      questionCounterEl.classList.remove("hidden");
+      questionTextEl.classList.remove("hidden");
+      optionsContainerEl.classList.remove("hidden");
+      $("#navigation-buttons").classList.remove("hidden");
+      scoreContainerEl.classList.add("hidden");
+      feedbackContainerEl.className="hidden";
+      feedbackContainerEl.textContent="";
+      const question=currentQ();
+      questionCounterEl.textContent="Pregunta "+(currentQuestionIndex+1)+" de "+order.length;
+      questionTextEl.textContent=question.question;
+      optionsContainerEl.innerHTML="";
+      prepareQuestionOptions(question).forEach((optionIndex,visibleIndex)=>{
+        const option=document.createElement("div");
+        option.className="option";
+        const input=document.createElement("input");
+        input.type="radio";
+        input.name="answer";
+        input.value=String(visibleIndex);
+        input.id="opt"+visibleIndex;
+        const label=document.createElement("label");
+        label.htmlFor=input.id;
+        label.textContent=question.options[optionIndex];
+        option.append(input,label);
+        option.addEventListener("click",event=>{
+          if(event.target!==input && event.target!==label && !input.disabled) input.checked=true;
+        });
+        optionsContainerEl.appendChild(option);
+      });
+      submitBtn.classList.remove("hidden");
+      skipBtn.classList.remove("hidden");
+      nextBtn.classList.add("hidden");
+      submitBtn.disabled=false;
+      skipBtn.disabled=false;
+      nextBtn.disabled=true;
+      qStartTime=performance.now();
+      const alreadyAnswered=applyStoredResult();
+      if(alreadyAnswered){
+        submitBtn.classList.add("hidden");
+        skipBtn.classList.add("hidden");
+        nextBtn.classList.remove("hidden");
+        nextBtn.disabled=false;
+      }
+      updateMiniNav();
+      updateRing();
+      updateLiveStatsBars();
+      saveProgress();
+    }
+    function commitResult(outcome,visibleChoice=null){
+      const originalIndex=currentOriginalIndex();
+      const question=quizData[originalIndex];
+      const chosen=visibleChoice!==null?(question._order?question._order[visibleChoice]:visibleChoice):null;
+      const seconds=qStartTime?Math.max(0,Math.round((performance.now()-qStartTime)/1000)):null;
+      const existing=results.findIndex(result=>result.qIndex===originalIndex);
+      const entry={qIndex:originalIndex,outcome,chosen,correct:question.correctAnswer,time:seconds};
+      if(existing>=0) results[existing]=entry;
+      else results.push(entry);
+      recalculateCounts();
+      saveProgress();
+    }
+    function showFeedback(correct,skipped=false,visibleChoice=null,shouldDisable=true){
+      const question=currentQ();
+      feedbackContainerEl.classList.remove("hidden","feedback-correct","feedback-incorrect","feedback-skipped");
+      let headline="";
+      if(skipped){feedbackContainerEl.classList.add("feedback-skipped");headline="Pregunta omitida."}
+      else if(correct){feedbackContainerEl.classList.add("feedback-correct");headline="¡Correcto!"}
+      else{feedbackContainerEl.classList.add("feedback-incorrect");headline="Incorrecto."}
+      if(shouldDisable) disableOptions();
+      const correctVisible=question._order.indexOf(question.correctAnswer);
+      const correctNode=document.querySelector("#opt"+correctVisible);
+      if(correctNode) correctNode.parentElement.classList.add("option-correct");
+      if(!correct && !skipped && visibleChoice!==null){
+        const wrongNode=document.querySelector("#opt"+visibleChoice);
+        if(wrongNode) wrongNode.parentElement.classList.add("option-incorrect");
+      }
+      const explanation=document.createElement("div");
+      explanation.className="feedback-explanation";
+      let html="<strong>"+headline+"</strong>";
+      if(skipped) html+="<br><strong>Respuesta correcta:</strong> "+escapeHtml(question.options[question.correctAnswer]);
+      const body=formatExplanation(question.explanation);
+      feedbackContainerEl.innerHTML=html;
+      if(body){
+        explanation.innerHTML="<strong>Explicación:</strong> "+body;
+        feedbackContainerEl.appendChild(explanation);
+      }
+      submitBtn.classList.add("hidden");
+      skipBtn.classList.add("hidden");
+      nextBtn.classList.remove("hidden");
+      nextBtn.disabled=false;
+      updateMiniNav();
+      updateRing();
+      updateLiveStatsBars();
+    }
+    function submitAnswer(){
+      const choice=selectedVisibleIndex();
+      if(choice===null){alert("Por favor, selecciona una respuesta.");return}
+      submitBtn.disabled=true;
+      skipBtn.disabled=true;
+      const question=currentQ();
+      const realChoice=question._order?question._order[choice]:choice;
+      const correct=realChoice===question.correctAnswer;
+      commitResult(correct?"ok":"ko",choice);
+      showFeedback(correct,false,choice);
+    }
+    function skipQuestion(){
+      submitBtn.disabled=true;
+      skipBtn.disabled=true;
+      commitResult("sk",null);
+      showFeedback(false,true,null);
+    }
+    function goToQuestion(index){
+      if(index<0 || index>=order.length) return;
+      currentQuestionIndex=index;
+      loadQuestion();
+    }
+    function nextQuestion(){
+      nextBtn.disabled=true;
+      if(currentQuestionIndex<order.length-1){
+        currentQuestionIndex++;
+        loadQuestion();
+      }else{
+        showFinalScore();
+      }
+    }
+    function gradeClass(score){
+      return score>=5?"grade-green":"grade-red";
+    }
+    function showFinalScore(){
+      const score=computeLiveScore();
+      questionTextEl.textContent="";
+      optionsContainerEl.innerHTML="";
+      $("#timer-bar").classList.add("hidden");
+      questionCounterEl.textContent="";
+      feedbackContainerEl.className="hidden";
+      finalScoreEl.textContent=score.toFixed(2);
+      finalScoreEl.classList.remove("grade-green","grade-red","grade-cyan","grade-amber");
+      finalScoreEl.classList.add(gradeClass(score));
+      correctCountsEl.textContent=correctCount;
+      incorrectCountsEl.textContent=incorrectCount;
+      skippedCountsEl.textContent=skippedCount;
+      questionCounterEl.classList.add("hidden");
+      questionTextEl.classList.add("hidden");
+      optionsContainerEl.classList.add("hidden");
+      $("#navigation-buttons").classList.add("hidden");
+      scoreContainerEl.classList.remove("hidden");
+      $("#restart-btn-2").onclick=restartQuiz;
+      renderReview();
+      updateRing();
+      finalScoreBig.textContent=score.toFixed(2);
+      finalScoreBig.className="";
+      finalScoreBig.classList.add(gradeClass(score));
+      finalMsg.textContent=score>=9?"Excelente rendimiento.":score>=7?"Muy buen trabajo.":score>=5?"Aprobado. Puedes mejorar.":"No alcanzaste el aprobado esta vez.";
+      finalOverlay.classList.add("hidden");
+      confettiBurst(120);
+      guardarEnNavegador(score);
+      saveProgress();
+    }
+    function renderReview(filter="all"){
+      const box=$("#score-breakdown");
+      const statusText={ok:"Bien",ko:"Mal",sk:"Sin contestar",pending:"Sin contestar"};
+      const statusClass={ok:"ok",ko:"ko",sk:"sk",pending:"sk"};
+      const allRows=quizData.map((question,index)=>{
+        const result=results.find(item=>item.qIndex===index);
+        return {question,index,result,outcome:result?result.outcome:"pending"};
+      });
+      const visibleRows=filter==="all"?allRows:allRows.filter(row=>row.outcome===filter || (filter==="sk" && row.outcome==="pending"));
+      const totals={
+        ok:allRows.filter(row=>row.outcome==="ok").length,
+        ko:allRows.filter(row=>row.outcome==="ko").length,
+        sk:allRows.filter(row=>row.outcome==="sk" || row.outcome==="pending").length
+      };
+      let html='<h3>Repaso completo de preguntas:</h3>';
+      html+='<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:8px 0 12px">';
+      html+='<button class="review-filter btn-blue" data-filter="all">Todas ('+allRows.length+')</button>';
+      html+='<button class="review-filter" data-filter="ok">Bien ('+totals.ok+')</button>';
+      html+='<button class="review-filter btn-red" data-filter="ko">Mal ('+totals.ko+')</button>';
+      html+='<button class="review-filter btn-amber" data-filter="sk">Sin contestar ('+totals.sk+')</button>';
+      html+='</div>';
+      html+='<p class="muted" style="text-align:center;margin:6px 0 12px">Acierto: '+Math.round(totals.ok/quizData.length*100)+'% · Fallos: '+Math.round(totals.ko/quizData.length*100)+'% · Sin contestar: '+Math.round(totals.sk/quizData.length*100)+'%</p>';
+      visibleRows.forEach(({question,index,result,outcome})=>{
+        const chosen=result&&result.chosen!==null?question.options[result.chosen]:"No respondida";
+        const correctIndex=result?result.correct:question.correctAnswer;
+        const correct=question.options[correctIndex];
+        html+='<div class="breakdown-item"><p class="q-text"><span class="pill '+statusClass[outcome]+'">'+statusText[outcome]+'</span> <strong>Pregunta '+(index+1)+':</strong> '+escapeHtml(question.question)+'</p><p class="chosen-ans"><strong>Tu respuesta:</strong> '+escapeHtml(chosen)+'</p><p class="correct-ans"><strong>Respuesta correcta:</strong> '+escapeHtml(correct)+'</p><p class="explanation"><strong>Explicación:</strong> '+formatExplanation(question.explanation)+'</p></div>';
+      });
+      if(!visibleRows.length) html+='<p style="text-align:center; padding: 20px 0;">No hay preguntas en este filtro.</p>';
+      html+='<div style="text-align:center;margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">';
+      if(totals.ko) html+='<button class="retry-mode btn-blue" data-mode="ko">Repetir solo falladas</button>';
+      if(totals.sk) html+='<button class="retry-mode btn-amber" data-mode="sk">Repetir omitidas</button>';
+      if(totals.ko || totals.sk) html+='<button class="retry-mode" data-mode="ko-sk">Repetir falladas + omitidas</button>';
+      html+='<button id="export-review-html" class="btn-blue">Exportar resumen HTML</button>';
+      html+='</div>';
+      box.innerHTML=html;
+      $$(".review-filter").forEach(button=>button.addEventListener("click",()=>renderReview(button.dataset.filter)));
+      $$(".retry-mode").forEach(button=>button.addEventListener("click",()=>startReviewMode(button.dataset.mode)));
+      $("#export-review-html")?.addEventListener("click",exportReviewHtml);
+    }
+    function startReviewMode(mode){
+      const selected=quizData.map((_,index)=>index).filter(index=>{
+        const result=results.find(item=>item.qIndex===index);
+        const outcome=result?result.outcome:"sk";
+        return mode==="ko"?outcome==="ko":mode==="sk"?outcome==="sk":outcome==="ko"||outcome==="sk";
+      });
+      if(!selected.length){toast("No hay preguntas para repetir en ese modo.");return}
+      order=selected;
+      results=[];
+      currentQuestionIndex=0;
+      reviewMode=true;
+      recalculateCounts();
+      scoreContainerEl.classList.add("hidden");
+      questionTextEl.parentElement.classList.remove("hidden");
+      finalOverlay.classList.add("hidden");
+      loadQuestion();
+      toast("Modo repaso iniciado.");
+    }
+    function startFailedOnly(){
+      const failed=results.filter(result=>result.outcome==="ko").map(result=>result.qIndex);
+      if(!failed.length){toast("No hay falladas para repetir.");return}
+      order=failed;
+      results=[];
+      currentQuestionIndex=0;
+      reviewMode=true;
+      recalculateCounts();
+      scoreContainerEl.classList.add("hidden");
+      questionTextEl.parentElement.classList.remove("hidden");
+      finalOverlay.classList.add("hidden");
+      loadQuestion();
+      toast("Modo repaso: solo falladas.");
+    }
+    function restartQuiz(){
+      if(!confirm("¿Reiniciar el examen y borrar el progreso guardado?")) return;
+      currentQuestionIndex=0;
+      results=[];
+      order=Array.from({length:quizData.length},(_,index)=>index);
+      reviewMode=false;
+      if(settings.shuffleQ) shuffleInPlace(order);
+      recalculateCounts();
+      clearProgress();
+      scoreContainerEl.classList.add("hidden");
+      questionTextEl.parentElement.classList.remove("hidden");
+      finalOverlay.classList.add("hidden");
+      loadQuestion();
+      updateLiveStatsBars();
+      updateRing();
+    }
+    function exportResults(){
+      const data={title:document.title,date:new Date().toISOString(),score:computeLiveScore(),correctCount,incorrectCount,skippedCount,results};
+      const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+      const url=URL.createObjectURL(blob);
+      const link=document.createElement("a");
+      link.href=url;
+      link.download="resultado-examen.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+    function buildReviewRows(){
+      const statusText={ok:"Bien",ko:"Mal",sk:"Sin contestar",pending:"Sin contestar"};
+      return quizData.map((question,index)=>{
+        const result=results.find(item=>item.qIndex===index);
+        const outcome=result?result.outcome:"pending";
+        const chosen=result&&result.chosen!==null?question.options[result.chosen]:"No respondida";
+        const correctIndex=result?result.correct:question.correctAnswer;
+        return {number:index+1,status:statusText[outcome],question:question.question,chosen,correct:question.options[correctIndex],explanation:normalizeExplanation(question.explanation)};
+      });
+    }
+    function exportReviewHtml(){
+      const rows=buildReviewRows();
+      const score=computeLiveScore().toFixed(2);
+      const body=rows.map(row=>'<section><h2>Pregunta '+row.number+' · '+escapeHtml(row.status)+'</h2><p><strong>Pregunta:</strong> '+escapeHtml(row.question)+'</p><p><strong>Tu respuesta:</strong> '+escapeHtml(row.chosen)+'</p><p><strong>Respuesta correcta:</strong> '+escapeHtml(row.correct)+'</p><p><strong>Explicación:</strong> '+escapeHtml(row.explanation)+'</p></section>').join("");
+      const documentHtml='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Resumen del examen</title><style>body{font-family:Arial,sans-serif;line-height:1.45;margin:24px;color:#172033}section{border-bottom:1px solid #ddd;padding:12px 0}h1{margin-bottom:4px}h2{font-size:1.05rem}</style></head><body><h1>'+escapeHtml(document.title)+'</h1><p><strong>Nota:</strong> '+score+' · <strong>Aciertos:</strong> '+correctCount+' · <strong>Fallos:</strong> '+incorrectCount+' · <strong>Sin contestar:</strong> '+skippedCount+'</p>'+body+'</body></html>';
+      const blob=new Blob([documentHtml],{type:"text/html"});
+      const url=URL.createObjectURL(blob);
+      const link=document.createElement("a");
+      link.href=url;
+      link.download="resumen-examen.html";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+    function hasActiveProgress(){
+      const answered=correctCount+incorrectCount+skippedCount;
+      return answered>0 && answered<totalQuestions;
+    }
+    function confettiBurst(amount=100){
+      for(let index=0;index<amount;index++){
+        const piece=document.createElement("div");
+        piece.className="confetti";
+        piece.style.left=100*Math.random()+"vw";
+        piece.style.background="hsl("+Math.floor(360*Math.random())+",90%,60%)";
+        piece.style.animation="fallConfetti "+(3+2*Math.random())+"s linear forwards";
+        piece.style.width=6+6*Math.random()+"px";
+        piece.style.height=10+10*Math.random()+"px";
+        piece.style.transform="rotate("+360*Math.random()+"deg)";
+        document.body.appendChild(piece);
+        setTimeout(()=>piece.remove(),6000);
+      }
+    }
+    document.getElementById("submit-btn").addEventListener("click",submitAnswer);
+    document.getElementById("skip-btn").addEventListener("click",skipQuestion);
+    document.getElementById("next-btn").addEventListener("click",nextQuestion);
+    document.getElementById("ovl-restart").addEventListener("click",restartQuiz);
+    document.getElementById("ovl-close").addEventListener("click",()=>finalOverlay.classList.add("hidden"));
+    document.addEventListener("keydown",event=>{
+      const key=event.key.toLowerCase();
+      if(key==="enter") document.getElementById("submit-btn").classList.contains("hidden")?document.getElementById("next-btn").classList.contains("hidden")||nextQuestion():submitAnswer();
+      else if(key==="s" && !document.getElementById("skip-btn").classList.contains("hidden")) skipQuestion();
+      else if(key==="n" && !document.getElementById("next-btn").classList.contains("hidden")) nextQuestion();
+      else if(key==="r" && !document.getElementById("score-container").classList.contains("hidden")) restartQuiz();
+      else if(key==="arrowleft") goToQuestion(currentQuestionIndex-1);
+      else if(key==="arrowright") goToQuestion(currentQuestionIndex+1);
+      else if(/^[1-4]$/.test(key)){
+        const input=document.querySelector("#opt"+(Number(key)-1));
+        if(input && !input.disabled) input.checked=true;
+      }
+    });
+    window.addEventListener("beforeunload",event=>{
+      if(!hasActiveProgress()) return;
+      event.preventDefault();
+      event.returnValue="";
+    });
+
+    
+
+
+
+
+
+
+    // Nota máxima por examen (no en los repasos) y lista de fallos de la unidad: se añaden las falladas
+    // u omitidas y se quitan las acertadas. Es lo que muestra la página de inicio.
+    function guardarEnNavegador(score){
+      if(!ENCONTRADO || !quizData[0] || quizData[0].clave===undefined) return;
+      if(!reviewMode && MODO!=="fallos"){
+        const notas=mejores(), clave=UNIDAD+"/"+MODO;
+        if(!(clave in notas) || score>notas[clave]){notas[clave]=score; almacen.guardar("sti-mejores",notas);}
+      }
+      const todos=fallos(), lista=new Set(todos[UNIDAD]||[]);
+      order.forEach(i=>{
+        const r=results.find(x=>x.qIndex===i), clave=quizData[i].clave;
+        if(r && r.outcome==="ok") lista.delete(clave); else lista.add(clave);
+      });
+      todos[UNIDAD]=[...lista];
+      almacen.guardar("sti-fallos",todos);
+    }
+
+    document.addEventListener("DOMContentLoaded",()=>{
+      if(settings.shuffleQ) shuffleInPlace(order);
+      restoreProgress();
+      loadQuestion();
+      updateLiveStatsBars();
+      updateRing();
+      const finalActions=$("#final-actions");
+      if(finalActions && !$("#ovl-export-json")){
+        const button=document.createElement("button");
+        button.id="ovl-export-json";
+        button.textContent="Exportar resultado";
+        button.addEventListener("click",exportResults);
+        finalActions.appendChild(button);
+      }
+    });
+
+  </script>
+</body>
+</html>
+

@@ -5,24 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CFGS STI · Tests</title>
   <meta name="description" content="Tests de práctica del CFGS Sistemas de Telecomunicaciones e Informáticos">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta name="theme-color" content="#160d1d">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="top">
-    <a href="#/" class="marca">
+  <div class="envoltorio">
+    <header class="cabecera">
       <span class="logo">STI</span>
-      <span>
-        <strong>CFGS Sistemas de Telecomunicaciones e Informáticos</strong>
-        <small>Tests de práctica por unidad</small>
-      </span>
-    </a>
-    <button id="tema" class="icono" title="Cambiar tema" aria-label="Cambiar tema">◐</button>
-  </header>
-  <main id="app"></main>
-  <footer class="pie">Preguntas elaboradas a partir del temario de cada unidad, más las autoevaluaciones de la plataforma. Material de estudio no oficial.</footer>
+      <div>
+        <h1>CFGS Sistemas de Telecomunicaciones e Informáticos</h1>
+        <p>Tests de práctica por unidad</p>
+      </div>
+    </header>
+
+    <nav id="botonera" class="botonera" aria-label="Asignaturas y accesos"></nav>
+    <section id="franja" class="franja" aria-label="Progreso por asignatura"></section>
+
+    <section class="panel" aria-labelledby="t-lanzador">
+      <h2 id="t-lanzador">Empezar un examen</h2>
+      <p class="ayuda">Elige asignatura, unidad y tipo de examen. Cada fallo resta un tercio de acierto (en la autoevaluación oficial, un sexto).</p>
+      <div class="lanzador">
+        <label>Asignatura <select id="sel-modulo"></select></label>
+        <label>Unidad <select id="sel-unidad"></select></label>
+        <label>Examen <select id="sel-tipo"></select></label>
+        <a id="empezar" class="neon c-verde" href="#">▶ Empezar</a>
+      </div>
+    </section>
+
+    <main id="app"></main>
+
+    <footer class="pie">Preguntas elaboradas a partir del temario de cada unidad, más las autoevaluaciones de la plataforma. Material de estudio no oficial.</footer>
+  </div>
   <script src="data/indice.js"></script>
+  <script src="comun.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
