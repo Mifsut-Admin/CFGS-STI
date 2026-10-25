@@ -7,6 +7,13 @@ window.INDICE = {
     "M3_U01", "M3_U02", "M3_U03", "M3_U04", "M3_U05", "M3_U06", "M3_U07", "M3_U08",
     "M4_U01", "M4_U02", "M4_U03", "M4_U04", "M4_U05", "M4_U06", "M4_U07", "M4_U08", "M4_U09",
   ],
+  // Unidades con autoevaluación oficial de la plataforma (data/<id>_oficial.js)
+  oficiales: [
+    "M1_U01", "M1_U03", "M1_U04", "M1_U05", "M1_U06", "M1_U07", "M1_U08", "M1_U09",
+    "M2_U02", "M2_U03", "M2_U04", "M2_U05", "M2_U06",
+    "M3_U01", "M3_U02", "M3_U03", "M3_U04", "M3_U05", "M3_U06", "M3_U07", "M3_U08",
+    "M4_U01", "M4_U02", "M4_U03", "M4_U04", "M4_U05", "M4_U06", "M4_U07", "M4_U08",
+  ],
   modulos: [
     {
       id: "M1", codigo: "CIST", nombre: "Configuración de infraestructuras de sistemas de telecomunicaciones",

@@ -1,6 +1,7 @@
 // Tests de práctica CFGS STI.
 // Cada unidad es un archivo data/Mx_Uyy.js que registra BANCO["Mx_Uyy"] = [{p, r: [correcta, ...incorrectas], e}].
 // La primera respuesta de "r" es siempre la correcta; las opciones se barajan en cada intento.
+// La autoevaluación oficial está en data/Mx_Uyy_oficial.js como [{p, o: [opciones en orden original], c: índice correcta, e}].
 
 window.BANCO = window.BANCO || {};
 const app = document.getElementById("app");
@@ -18,6 +19,24 @@ function barajar(lista) {
   }
   return a;
 }
+
+// Opciones como "Todas son correctas" se quedan en su sitio; si alguna opción se refiere a
+// otras ("las dos anteriores", "A) y B)"), no se baraja nada para no cambiar su sentido.
+const META = /^(todas|todos|ninguna|ninguno|las dos|ambas)\b/i;
+const REFERENCIA = /anterior|\b[A-D]\)|\b[A-D] y [A-D]\b/;
+
+function ordenarOpciones(textos, correcta) {
+  const lista = textos.map((texto, i) => ({ texto, correcta: i === correcta }));
+  if (textos.some((t) => REFERENCIA.test(t))) return lista;
+  const huecos = lista.map((o, i) => (META.test(o.texto) ? null : i)).filter((i) => i !== null);
+  const mezcla = barajar(huecos.map((i) => lista[i]));
+  huecos.forEach((pos, k) => { lista[pos] = mezcla[k]; });
+  return lista;
+}
+
+// Pregunta en formato común: {p, o, c, e} (las del banco normal tienen la correcta en r[0]).
+const normalizar = (q) => (q.o ? q : { p: q.p, o: q.r, c: 0, e: q.e });
+const esOficial = (id) => (INDICE.oficiales || []).includes(id);
 
 const almacen = {
   leer(clave, defecto) {
@@ -57,7 +76,7 @@ function vistaInicio() {
   const total = INDICE.modulos.reduce((n, m) => n + m.unidades.length, 0);
   app.innerHTML = `
     <h1>Elige un módulo</h1>
-    <p class="sub">${INDICE.modulos.length} módulos · ${total} unidades · 60 preguntas por unidad en 2 exámenes de 30.</p>
+    <p class="sub">${INDICE.modulos.length} módulos · ${total} unidades · 60 preguntas por unidad en 2 exámenes de 30, más la autoevaluación oficial de la plataforma.</p>
     <div class="rejilla">
       ${INDICE.modulos.map((m) => `
         <a class="tarjeta" href="#/m/${m.id}">
@@ -99,6 +118,7 @@ function vistaModulo(idModulo) {
             <a class="boton" href="#/t/${u.id}/1">Examen 1 ${nota(u.id + "/1")}</a>
             <a class="boton" href="#/t/${u.id}/2">Examen 2 ${nota(u.id + "/2")}</a>
             <a class="boton" href="#/t/${u.id}/azar">Aleatorio ${nota(u.id + "/azar")}</a>
+            ${esOficial(u.id) ? `<a class="boton" href="#/t/${u.id}/oficial">Autoevaluación oficial ${nota(u.id + "/oficial")}</a>` : ""}
             ${fu ? `<a class="boton" href="#/t/${u.id}/fallos">Repasar fallos (${fu})</a>` : ""}
           </div>
         </div>`;
@@ -111,23 +131,31 @@ async function vistaTest(idUnidad, modo) {
   if (!encontrado || !INDICE.listas.includes(idUnidad)) return vistaInicio();
   const { modulo, unidad } = encontrado;
   app.innerHTML = `<p class="sub">Cargando preguntas…</p>`;
-  let banco;
-  try { banco = await cargarUnidad(idUnidad); } catch (err) {
+  // Cada pregunta lleva su "clave" para la lista de fallos: número en el banco normal, "o<n>" en la oficial.
+  let banco = [], oficial = [];
+  try {
+    if (modo !== "oficial") banco = await cargarUnidad(idUnidad);
+    if (esOficial(idUnidad) && (modo === "oficial" || modo === "fallos")) oficial = await cargarUnidad(idUnidad + "_oficial");
+  } catch (err) {
     app.innerHTML = `<p class="sub">${esc(err.message)}. <a href="#/m/${modulo.id}">Volver</a></p>`;
     return;
   }
+  const delBanco = (i) => banco[i] && { q: normalizar(banco[i]), clave: i };
+  const delOficial = (i) => oficial[i] && { q: normalizar(oficial[i]), clave: "o" + i };
 
   let seleccion;
-  if (modo === "1") seleccion = banco.slice(0, POR_EXAMEN);
-  else if (modo === "2") seleccion = banco.slice(POR_EXAMEN, POR_EXAMEN * 2);
-  else if (modo === "fallos") seleccion = (fallos()[idUnidad] || []).map((i) => banco[i]).filter(Boolean);
-  else seleccion = barajar(banco).slice(0, POR_EXAMEN);
+  if (modo === "1") seleccion = banco.slice(0, POR_EXAMEN).map((_, i) => delBanco(i));
+  else if (modo === "2") seleccion = banco.slice(POR_EXAMEN, POR_EXAMEN * 2).map((_, i) => delBanco(POR_EXAMEN + i));
+  else if (modo === "oficial") seleccion = oficial.map((_, i) => delOficial(i));
+  else if (modo === "fallos") seleccion = (fallos()[idUnidad] || [])
+    .map((k) => (String(k).startsWith("o") ? delOficial(Number(String(k).slice(1))) : delBanco(k))).filter(Boolean);
+  else seleccion = barajar(banco.map((_, i) => delBanco(i))).slice(0, POR_EXAMEN);
   if (!seleccion.length) return vistaModulo(modulo.id);
 
-  const nombreModo = { "1": "Examen 1", "2": "Examen 2", azar: "Aleatorio", fallos: "Repaso de fallos" }[modo] || "Test";
-  const preguntas = barajar(seleccion).map((q) => {
-    const opciones = barajar(q.r.map((texto, i) => ({ texto, correcta: i === 0 })));
-    return { q, indice: banco.indexOf(q), opciones, elegida: null };
+  const nombreModo = { "1": "Examen 1", "2": "Examen 2", azar: "Aleatorio", oficial: "Autoevaluación oficial", fallos: "Repaso de fallos" }[modo] || "Test";
+  const preguntas = barajar(seleccion).map(({ q, clave }) => {
+    const opciones = ordenarOpciones(q.o, q.c);
+    return { q, indice: clave, opciones, correcta: q.o[q.c], elegida: null };
   });
   let actual = 0;
 
@@ -153,7 +181,7 @@ async function vistaTest(idUnidad, modo) {
         ${respondida ? (() => {
           const acierto = item.opciones[item.elegida].correcta;
           return `<div class="explicacion ${acierto ? "es-ok" : "es-mal"}">
-            <strong>${acierto ? "✓ ¡Correcto!" : `✗ Incorrecto. La respuesta correcta es: ${esc(item.q.r[0])}`}</strong>
+            <strong>${acierto ? "✓ ¡Correcto!" : `✗ Incorrecto. La respuesta correcta es: ${esc(item.correcta)}`}</strong>
             ${item.q.e ? `<p>${esc(item.q.e)}</p>` : ""}
           </div>`;
         })() : ""}
@@ -209,7 +237,7 @@ async function vistaTest(idUnidad, modo) {
           <div class="tarjeta">
             <h3>${esc(x.q.p)}</h3>
             ${x.elegida !== null ? `<div class="tuya">✗ Tu respuesta: ${esc(x.opciones[x.elegida].texto)}</div>` : `<div class="tuya">✗ Sin responder</div>`}
-            <div class="buena">✓ Correcta: ${esc(x.q.r[0])}</div>
+            <div class="buena">✓ Correcta: ${esc(x.correcta)}</div>
             ${x.q.e ? `<div class="por-que">${esc(x.q.e)}</div>` : ""}
           </div>`).join("")}
       </div>` : ""}`;
