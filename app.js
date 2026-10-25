@@ -35,6 +35,32 @@ function pintarBotonera(vista) {
     <a class="neon ${b.clase}" href="${b.href}" title="${esc(b.titulo)}" aria-pressed="${vista === b.id}">${esc(b.texto)}</a>`).join("");
 }
 
+// Saludo a María con un resumen de su progreso guardado.
+function pintarSaludo() {
+  const notas = Object.values(mejores());
+  const unidades = INDICE.modulos.flatMap((m) => m.unidades);
+  const superadas = unidades.filter((u) => superada(u.id)).length;
+  const pendientes = unidades.reduce((n, u) => n + nFallos(u.id), 0);
+  const media = notas.length ? notas.reduce((a, b) => a + b, 0) / notas.length : null;
+  const n = ALUMNA.nombre;
+  let frase;
+  if (!notas.length) frase = `Bienvenida a tu web de estudio, ${n}. Elige una unidad y haz tu primer examen: cada respuesta trae su explicación.`;
+  else if (superadas === unidades.length) frase = `¡Lo has superado todo, ${n}! Repasa los fallos y las autoevaluaciones oficiales para llegar al examen a tope.`;
+  else if (pendientes) frase = `Vas avanzando, ${n}. Tienes ${pendientes} preguntas falladas esperando en «Repasar fallos»: son las que más te ayudan a subir nota.`;
+  else frase = `¡Muy bien, ${n}! No tienes fallos pendientes. Sigue con la siguiente unidad.`;
+  document.getElementById("saludo").innerHTML = `
+    <div>
+      <h2>${saludo()}, ${esc(n)} 👋</h2>
+      <p>${esc(frase)}</p>
+    </div>
+    <div class="cifras">
+      <div class="cifra"><strong>${notas.length}</strong><span>Exámenes hechos</span></div>
+      <div class="cifra"><strong>${media === null ? "—" : media.toFixed(1)}</strong><span>Nota media</span></div>
+      <div class="cifra"><strong>${superadas}/${unidades.length}</strong><span>Unidades superadas</span></div>
+      <div class="cifra"><strong>${pendientes}</strong><span>Fallos por repasar</span></div>
+    </div>`;
+}
+
 function pintarFranja() {
   document.getElementById("franja").innerHTML = INDICE.modulos.map((m) => {
     const hechas = m.unidades.filter((u) => superada(u.id)).length;
@@ -141,6 +167,7 @@ function vistaLista(titulo, ayuda, filtro, modo, detalle) {
 function enrutar() {
   const vista = location.hash.replace(/^#\/?/, "") || almacen.leer("sti-modulo", "M1");
   pintarBotonera(vista);
+  pintarSaludo();
   pintarFranja();
   if (vista === "fallos") {
     vistaLista("Repasar fallos", "Unidades con preguntas falladas u omitidas. Al acertarlas en el repaso desaparecen de la lista.",

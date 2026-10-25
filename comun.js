@@ -1,5 +1,25 @@
 // Utilidades compartidas por la página de inicio (app.js) y la de examen (examen.html).
 window.BANCO = window.BANCO || {};
+
+// Alumna para la que está hecha la web (se usa en saludos y mensajes de nota).
+const ALUMNA = { nombre: "María", completo: "María Oyonarte" };
+
+// Versión de los archivos: cámbiala al publicar para que el navegador no use copias antiguas.
+const VERSION = "20261025b";
+
+function saludo() {
+  const h = new Date().getHours();
+  return h < 6 ? "Buenas noches" : h < 14 ? "Buenos días" : h < 21 ? "Buenas tardes" : "Buenas noches";
+}
+
+// Mensaje personalizado según la nota (sobre 10).
+function mensajeNota(nota) {
+  const n = ALUMNA.nombre;
+  if (nota >= 9) return `¡Excelente, ${n}! Dominas este tema: estás preparadísima.`;
+  if (nota >= 7) return `¡Muy buen trabajo, ${n}! Repasa las falladas y lo bordas.`;
+  if (nota >= 5) return `Aprobado, ${n}. Vas por buen camino: lee las explicaciones de las que has fallado y sube nota.`;
+  return `Esta vez no ha salido, ${n}, pero cada fallo es una explicación que te acerca al aprobado. Repite las falladas, ¡tú puedes!`;
+}
 const POR_EXAMEN = 30;
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));

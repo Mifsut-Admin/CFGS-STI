@@ -225,7 +225,9 @@
 
       </div>
       <div id="score-container" class="hidden" aria-live="polite">
-        <h2>¡Examen finalizado!</h2>
+        <h2 id="titulo-final">¡Examen finalizado!</h2>
+        <p id="mensaje-alumna" style="font-size:1.1rem;font-weight:700;color:#fff7dc;margin:6px 0 14px"></p>
+        <p id="record" class="hidden" style="color:var(--amber);font-weight:800">🏆 ¡Nueva mejor nota en este examen!</p>
         <p>Aciertos: <strong id="counts-correct">0</strong></p>
         <p>Fallos: <strong id="counts-incorrect">0</strong></p>
         <p>Omitidas: <strong id="counts-skipped">0</strong></p>
@@ -252,8 +254,8 @@
   </div>
 
   <div id="toast" class="toast hidden" role="status"></div>
-  <script src="data/indice.js"></script>
-  <script src="comun.js"></script>
+  <script src="data/indice.js?v=20261025b"></script>
+  <script src="comun.js?v=20261025b"></script>
   <script>
     // Parámetros: ?u=M1_U01&t=1|2|azar|oficial|fallos. Se cargan los archivos de la unidad antes del examen.
     const PARAM = new URLSearchParams(location.search);
@@ -261,8 +263,8 @@
     const MODO = MODOS[PARAM.get("t")] ? PARAM.get("t") : "1";
     const ENCONTRADO = buscar(UNIDAD);
     if (ENCONTRADO && estaLista(UNIDAD)) {
-      if (MODO !== "oficial") document.write('<script src="data/' + UNIDAD + '.js"><\/script>');
-      if (esOficial(UNIDAD) && (MODO === "oficial" || MODO === "fallos")) document.write('<script src="data/' + UNIDAD + '_oficial.js"><\/script>');
+      if (MODO !== "oficial") document.write('<script src="data/' + UNIDAD + '.js?v=' + VERSION + '"><\/script>');
+      if (esOficial(UNIDAD) && (MODO === "oficial" || MODO === "fallos")) document.write('<script src="data/' + UNIDAD + '_oficial.js?v=' + VERSION + '"><\/script>');
     }
   </script>
   <script>
@@ -572,10 +574,12 @@
       finalScoreBig.textContent=score.toFixed(2);
       finalScoreBig.className="";
       finalScoreBig.classList.add(gradeClass(score));
-      finalMsg.textContent=score>=9?"Excelente rendimiento.":score>=7?"Muy buen trabajo.":score>=5?"Aprobado. Puedes mejorar.":"No alcanzaste el aprobado esta vez.";
+      finalMsg.textContent=mensajeNota(score);
+      $("#titulo-final").textContent="¡Examen terminado, "+ALUMNA.nombre+"!";
+      $("#mensaje-alumna").textContent=mensajeNota(score);
       finalOverlay.classList.add("hidden");
       confettiBurst(120);
-      guardarEnNavegador(score);
+      $("#record").classList.toggle("hidden",!guardarEnNavegador(score));
       saveProgress();
     }
     function renderReview(filter="all"){
@@ -750,10 +754,13 @@
 
     // Nota máxima por examen (no en los repasos) y lista de fallos de la unidad: se añaden las falladas
     // u omitidas y se quitan las acertadas. Es lo que muestra la página de inicio.
+    // Devuelve true si se ha superado una nota anterior (para felicitar el récord).
     function guardarEnNavegador(score){
-      if(!ENCONTRADO || !quizData[0] || quizData[0].clave===undefined) return;
+      if(!ENCONTRADO || !quizData[0] || quizData[0].clave===undefined) return false;
+      let record=false;
       if(!reviewMode && MODO!=="fallos"){
         const notas=mejores(), clave=UNIDAD+"/"+MODO;
+        record=clave in notas && score>notas[clave];
         if(!(clave in notas) || score>notas[clave]){notas[clave]=score; almacen.guardar("sti-mejores",notas);}
       }
       const todos=fallos(), lista=new Set(todos[UNIDAD]||[]);
@@ -763,6 +770,7 @@
       });
       todos[UNIDAD]=[...lista];
       almacen.guardar("sti-fallos",todos);
+      return record;
     }
 
     document.addEventListener("DOMContentLoaded",()=>{

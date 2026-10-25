@@ -50,6 +50,16 @@ a { color: inherit; }
 .cabecera p { margin: 3px 0 0; color: var(--muted); font-size: .85rem; display: flex; align-items: center; gap: 8px; }
 .cabecera p::before { content: ""; width: 26px; height: 2px; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
 
+/* Saludo personalizado */
+.saludo { display: grid; gap: 10px; margin-top: 14px; padding: 14px; border-radius: 14px; border: 1px solid rgba(98, 231, 242, .35); background: linear-gradient(135deg, rgba(0, 166, 184, .16), rgba(155, 99, 244, .18)); box-shadow: 0 0 16px rgba(98, 231, 242, .12); }
+.saludo h2 { margin: 0; font-size: 1.15rem; color: #fff; text-shadow: 0 0 8px rgba(98, 231, 242, .5); }
+.saludo p { margin: 0; color: var(--muted); font-size: .9rem; }
+.cifras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.cifra { padding: 8px 10px; border-radius: 10px; background: var(--panel-2); text-align: center; }
+.cifra strong { display: block; font-size: 1.25rem; color: var(--cyan); text-shadow: 0 0 8px rgba(98, 231, 242, .5); }
+.cifra span { font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+@media (min-width: 640px) { .saludo { grid-template-columns: 1fr auto; align-items: center; } .cifras { grid-template-columns: repeat(4, minmax(90px, 1fr)); } }
+
 /* Botonera principal */
 .botonera { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
 .neon {
