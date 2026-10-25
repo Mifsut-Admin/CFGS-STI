@@ -98,11 +98,20 @@ selModulo.addEventListener("change", rellenarUnidades);
 selUnidad.addEventListener("change", rellenarTipos);
 selTipo.addEventListener("change", () => { empezar.href = enlace(selUnidad.value, selTipo.value); });
 
+// Tarjeta que gira al pasar el ratón: delante el examen, detrás "Empezar" con su descripción.
 function botonExamen(id, t) {
   const clase = { "1": "c-violeta", "2": "c-violeta", azar: "c-cian", oficial: "c-azul", fallos: "c-rojo" }[t.modo];
   const detalle = t.modo === "fallos" ? `${nFallos(id)} preguntas`
     : t.nota !== undefined ? `Mejor nota ${t.nota.toFixed(2)}` : t.modo === "oficial" ? "10 preguntas reales" : "30 preguntas";
-  return `<a class="neon ${clase}" href="${enlace(id, t.modo)}">${esc(t.nombre)}<small>${esc(detalle)}</small></a>`;
+  const dorso = { "1": "Preguntas 1 a 30 del tema", "2": "Preguntas 31 a 60 del tema", azar: "30 al azar entre las 60",
+    oficial: "Las de la plataforma, con explicación", fallos: "Acierta y desaparecen" }[t.modo];
+  return `
+    <a class="giro ${clase}" href="${enlace(id, t.modo)}" aria-label="${esc(t.nombre)} · ${esc(detalle)}">
+      <span class="interior">
+        <span class="cara frente">${esc(t.nombre)}<small>${esc(detalle)}</small></span>
+        <span class="cara dorso" aria-hidden="true">▶ Empezar<small>${esc(dorso)}</small></span>
+      </span>
+    </a>`;
 }
 
 function vistaModulo(idModulo) {
