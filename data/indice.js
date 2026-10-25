@@ -3,6 +3,7 @@ window.INDICE = {
   // Unidades cuyas preguntas ya están publicadas en data/
   listas: [
     "M1_U01", "M1_U02", "M1_U03", "M1_U04", "M1_U05", "M1_U06", "M1_U07", "M1_U08", "M1_U09",
+    "M2_U01", "M2_U02", "M2_U03", "M2_U04", "M2_U05", "M2_U06",
   ],
   modulos: [
     {
