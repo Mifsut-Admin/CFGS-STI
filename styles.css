@@ -211,7 +211,8 @@ details[open] .flecha { transform: rotate(180deg); }
 /* Escritorio */
 @media (min-width: 980px) {
   .envoltorio { padding: 18px 24px 48px; }
-  .botonera { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .botonera { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .botonera.con-preguntame { grid-template-columns: repeat(7, minmax(0, 1fr)); }
   .botonera .preguntame { grid-column: auto; }
   .franja { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .examenes { grid-template-columns: repeat(5, minmax(0, 1fr)); }

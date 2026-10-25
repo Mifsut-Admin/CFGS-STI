@@ -4,11 +4,12 @@ window.BANCO = window.BANCO || {};
 // Alumna para la que está hecha la web (se usa en saludos y mensajes de nota).
 const ALUMNA = { nombre: "María", completo: "María Oyonarte" };
 
-// Cuaderno de NotebookLM con los temas, para resolver dudas.
-const NOTEBOOK = "https://notebook.google.com/notebook/f0d2a534-5b96-4600-96f9-47f70ceb0f46/preview";
+// Cuaderno de NotebookLM con los temas, para resolver dudas. Vacío = botones «Pregúntame» ocultos.
+// Para activarlo: "https://notebook.google.com/notebook/f0d2a534-5b96-4600-96f9-47f70ceb0f46/preview"
+const NOTEBOOK = "";
 
 // Versión de los archivos: cámbiala al publicar para que el navegador no use copias antiguas.
-const VERSION = "20261025i";
+const VERSION = "20261025j";
 
 function saludo() {
   const h = new Date().getHours();
