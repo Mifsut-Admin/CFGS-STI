@@ -224,7 +224,12 @@
         <button id="skip-btn" class="btn-amber">Pasar Pregunta</button>
         <button id="next-btn" class="hidden btn-blue">Siguiente Pregunta</button>
         <button id="restart-btn" class="hidden btn-blue">Reiniciar Examen</button>
-        
+        <a id="preguntame" href="https://notebook.google.com/notebook/f0d2a534-5b96-4600-96f9-47f70ceb0f46/preview" target="_blank" rel="noopener" aria-label="Resolver dudas con IA" class="btn-help">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z" />
+          </svg>
+          <span>Pregúntame si tienes dudas</span>
+        </a>
 
       </div>
       <div id="score-container" class="hidden" aria-live="polite">
@@ -257,8 +262,8 @@
   </div>
 
   <div id="toast" class="toast hidden" role="status"></div>
-  <script src="data/indice.js?v=20261025h"></script>
-  <script src="comun.js?v=20261025h"></script>
+  <script src="data/indice.js?v=20261025i"></script>
+  <script src="comun.js?v=20261025i"></script>
   <script>
     // Parámetros: ?u=M1_U01&t=1|2|azar|oficial|fallos. Se cargan los archivos de la unidad antes del examen.
     const PARAM = new URLSearchParams(location.search);
