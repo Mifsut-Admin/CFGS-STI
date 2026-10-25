@@ -105,15 +105,6 @@ function botonExamen(id, t) {
   return `<a class="neon ${clase}" href="${enlace(id, t.modo)}">${esc(t.nombre)}<small>${esc(detalle)}</small></a>`;
 }
 
-function resumenUnidad(id) {
-  const n = mejores();
-  const nota = (modo) => (`${id}/${modo}` in n ? n[`${id}/${modo}`].toFixed(1) : "—");
-  const partes = [`E1 ${nota("1")}`, `E2 ${nota("2")}`];
-  if (esOficial(id)) partes.push(`Oficial ${nota("oficial")}`);
-  if (nFallos(id)) partes.push(`${nFallos(id)} fallos`);
-  return (superada(id) ? "✔ Superada · " : "") + partes.join(" · ");
-}
-
 function vistaModulo(idModulo) {
   const m = INDICE.modulos.find((x) => x.id === idModulo) || INDICE.modulos[0];
   const color = ESTILO[m.id].color;
@@ -132,7 +123,7 @@ function vistaModulo(idModulo) {
         <details class="unidad" data-id="${u.id}" ${abierta === u.id ? "open" : ""}>
           <summary>
             <span class="num">${u.n}</span>
-            <span class="tit"><strong>${esc(u.titulo)}</strong><small>${esc(resumenUnidad(u.id))}</small></span>
+            <span class="tit"><strong>${esc(u.titulo)}</strong>${superada(u.id) ? `<small>✔ Superada</small>` : ""}</span>
             <span class="flecha" aria-hidden="true">▾</span>
           </summary>
           <div class="cuerpo"><div class="examenes">${tipos(u.id).map((t) => botonExamen(u.id, t)).join("")}</div></div>
