@@ -5,7 +5,7 @@ window.BANCO = window.BANCO || {};
 const ALUMNA = { nombre: "María", completo: "María Oyonarte" };
 
 // Versión de los archivos: cámbiala al publicar para que el navegador no use copias antiguas.
-const VERSION = "20261025f";
+const VERSION = "20261025g";
 
 function saludo() {
   const h = new Date().getHours();

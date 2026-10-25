@@ -61,7 +61,7 @@ a { color: inherit; }
 @media (min-width: 640px) { .saludo { grid-template-columns: 1fr auto; align-items: center; } .cifras { grid-template-columns: repeat(4, minmax(90px, 1fr)); } }
 
 /* Foto de María en la cabecera */
-.avatar { object-fit: cover; padding: 0; background: #2a1638; border: 2px solid var(--cyan); box-shadow: 0 0 14px rgba(98, 231, 242, .55), 0 0 26px rgba(155, 99, 244, .35); }
+.avatar { width: 54px; height: 72px; border-radius: 12px; object-fit: cover; object-position: center top; padding: 0; background: #2a1638; border: 2px solid var(--cyan); box-shadow: 0 0 14px rgba(98, 231, 242, .55), 0 0 26px rgba(155, 99, 244, .35); }
 
 /* Botonera principal */
 .botonera { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
