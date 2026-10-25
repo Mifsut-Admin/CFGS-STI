@@ -2,7 +2,7 @@
 
 Web de estudio para el ciclo formativo de grado superior **Sistemas de Telecomunicaciones e Informáticos**.
 
-Cada unidad tiene **60 preguntas** tipo test elaboradas a partir del temario, repartidas en dos exámenes de 30, más un modo aleatorio y un repaso de las preguntas falladas. Cada respuesta incluye una explicación pensada para aprender del error.
+Cada unidad tiene **60 preguntas** tipo test elaboradas a partir del temario, repartidas en dos exámenes de 30, más un modo aleatorio y un repaso de las preguntas falladas. Casi todas las unidades incluyen además la **autoevaluación oficial** de la plataforma (10 preguntas reales). Cada respuesta incluye una explicación pensada para aprender del error.
 
 ## Módulos
 
@@ -24,5 +24,6 @@ Las notas y la lista de preguntas falladas se guardan en el navegador de cada pe
 - `index.html`, `styles.css`, `app.js`: la aplicación.
 - `data/indice.js`: módulos y unidades; `listas` indica qué unidades están publicadas.
 - `data/Mx_Uyy.js`: preguntas de cada unidad. La primera opción de `r` es la correcta (la web baraja las opciones en cada intento) y `e` es la explicación.
+- `data/Mx_Uyy_oficial.js`: autoevaluación oficial de la unidad. `o` son las opciones en su orden original y `c` el índice de la correcta (las opciones tipo «Todas/Ninguna/Las anteriores» no se barajan). `data/indice.js` → `oficiales` indica qué unidades la tienen.
 
 Material de estudio no oficial.
