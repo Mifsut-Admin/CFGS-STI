@@ -5,11 +5,10 @@ window.BANCO = window.BANCO || {};
 const ALUMNA = { nombre: "María", completo: "María Oyonarte" };
 
 // Cuaderno de NotebookLM con los temas, para resolver dudas. Vacío = botones «Pregúntame» ocultos.
-// Para activarlo: "https://notebook.google.com/notebook/f0d2a534-5b96-4600-96f9-47f70ceb0f46/preview"
-const NOTEBOOK = "";
+const NOTEBOOK = "https://notebook.google.com/notebook/3e7a706b-d691-46a8-876e-c6b363262ef4/preview";
 
 // Versión de los archivos: cámbiala al publicar para que el navegador no use copias antiguas.
-const VERSION = "20261025j";
+const VERSION = "20261026a";
 
 function saludo() {
   const h = new Date().getHours();
