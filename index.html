@@ -8,7 +8,10 @@
   <meta name="theme-color" content="#160d1d">
   <link rel="icon" type="image/png" href="img/icono.png">
   <link rel="apple-touch-icon" href="img/icono-180.png">
-  <link rel="stylesheet" href="styles.css?v=20261026a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap">
+  <link rel="stylesheet" href="styles.css?v=20261112a">
 </head>
 <body>
   <div class="envoltorio">
@@ -25,6 +28,29 @@
     <nav id="botonera" class="botonera" aria-label="Asignaturas y accesos"></nav>
     <section id="franja" class="franja" aria-label="Progreso por asignatura"></section>
 
+    <section class="panel archivo" aria-labelledby="t-archivo">
+      <h2 id="t-archivo"><span class="sello">Archivo recuperado</span> <span class="aviso-borrado">Reprodúcelo antes de que el sistema lo elimine <span aria-hidden="true">/////////</span></span></h2>
+      <div id="cintas" class="cintas" role="group" aria-label="Elegir vídeo"></div>
+      <div id="pantalla" class="pantalla">
+        <canvas id="lienzo" width="1280" height="720" role="img" aria-label="Vídeo animado con tu progreso de estudio"></canvas>
+        <button id="play-grande" class="play-grande" type="button" aria-label="Reproducir el vídeo">▶</button>
+        <div id="fin" class="fin" hidden>
+          <a id="fin-ir" class="neon c-naranja" href="#">▶ Empezar</a>
+          <button id="fin-otra" class="neon c-gris" type="button">↺ Ver otra vez</button>
+        </div>
+      </div>
+      <div class="mandos">
+        <button id="v-play" class="mando" type="button" aria-label="Reproducir">▶</button>
+        <input id="v-barra" type="range" min="0" max="1" step="0.01" value="0" aria-label="Posición del vídeo">
+        <span id="v-tiempo" class="v-tiempo">00:00 / 00:00</span>
+        <button id="v-sonido" class="mando" type="button" aria-label="Quitar sonido">🔊</button>
+        <button id="v-formato" class="mando ancho" type="button">⇄ 9:16</button>
+        <button id="v-completa" class="mando" type="button" aria-label="Pantalla completa">⛶</button>
+        <button id="v-descargar" class="mando ancho" type="button">⬇ Descargar</button>
+      </div>
+      <p id="v-aviso" class="ayuda v-aviso" aria-live="polite"></p>
+    </section>
+
     <section class="panel" aria-labelledby="t-lanzador">
       <h2 id="t-lanzador">Empezar un examen</h2>
       <p class="ayuda">Elige asignatura, unidad y tipo de examen. Cada fallo resta un tercio de acierto (en la autoevaluación oficial, un sexto).</p>
@@ -40,8 +66,9 @@
 
     <footer class="pie">Preguntas elaboradas a partir del temario de cada unidad, más las autoevaluaciones de la plataforma. Material de estudio no oficial.</footer>
   </div>
-  <script src="data/indice.js?v=20261026a"></script>
-  <script src="comun.js?v=20261026a"></script>
-  <script src="app.js?v=20261026a"></script>
+  <script src="data/indice.js?v=20261112a"></script>
+  <script src="comun.js?v=20261112a"></script>
+  <script src="app.js?v=20261112a"></script>
+  <script src="videos.js?v=20261112a"></script>
 </body>
 </html>

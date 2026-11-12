@@ -219,3 +219,35 @@ details[open] .flecha { transform: rotate(180deg); }
   .cabecera h1 { font-size: 1.6rem; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+
+/* Vídeos «Archivo recuperado» (estética de cámara de vigilancia: naranja y cian) */
+.archivo { --nar: #ff8400; --hielo: #ace8ff; border-color: rgba(255, 132, 0, .45); background: linear-gradient(180deg, rgba(8, 8, 12, .96), rgba(24, 12, 30, .94)); box-shadow: 0 0 22px rgba(255, 132, 0, .14), 0 0 30px rgba(172, 232, 255, .08); }
+.archivo h2 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-family: "Orbitron", system-ui, sans-serif; }
+.sello { color: var(--hielo); text-shadow: 0 0 10px rgba(172, 232, 255, .6); }
+.aviso-borrado { font: 400 .8rem "Share Tech Mono", ui-monospace, monospace; letter-spacing: .04em; color: var(--nar); text-shadow: 0 0 8px rgba(255, 132, 0, .5); }
+.cintas { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 12px; }
+.cinta { min-height: 36px; padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(172, 232, 255, .45); background: rgba(0, 0, 0, .35); color: var(--hielo); font: 700 .72rem "Orbitron", system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; transition: background .2s, box-shadow .2s; }
+.cinta:hover { background: rgba(172, 232, 255, .1); }
+.cinta[aria-pressed="true"] { border-color: var(--nar); color: #fff; background: rgba(255, 132, 0, .18); box-shadow: 0 0 12px rgba(255, 132, 0, .4); }
+.cinta:focus-visible, .mando:focus-visible, .play-grande:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.pantalla { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255, 132, 0, .5); box-shadow: 0 0 22px rgba(255, 132, 0, .18); background: #000; }
+.pantalla.vertical { max-width: 420px; margin: 0 auto; }
+.pantalla canvas { display: block; width: 100%; height: auto; cursor: pointer; }
+.pantalla:fullscreen { display: grid; place-items: center; max-width: none; border: 0; border-radius: 0; }
+.pantalla:fullscreen canvas { width: 100%; height: 100%; object-fit: contain; }
+.play-grande { position: absolute; inset: 0; margin: auto; width: 84px; height: 84px; border-radius: 50%; border: 2px solid var(--nar); background: rgba(0, 0, 0, .6); color: var(--nar); font-size: 2rem; cursor: pointer; box-shadow: 0 0 24px rgba(255, 132, 0, .55); text-shadow: 0 0 10px var(--nar); animation: latido 1.6s ease-in-out infinite; }
+.play-grande[hidden] { display: none; }
+@keyframes latido { 50% { box-shadow: 0 0 40px rgba(255, 132, 0, .85); } }
+.fin { position: absolute; left: 0; right: 0; bottom: 6%; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 0 12px; }
+.fin[hidden] { display: none; }
+.c-naranja { --c1: #c75a00; --c2: #ff8400; }
+.mandos { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.mando { min-width: 40px; min-height: 40px; padding: 0 8px; border-radius: 8px; border: 1px solid rgba(172, 232, 255, .4); background: rgba(0, 0, 0, .35); color: var(--hielo); font-size: 1rem; cursor: pointer; }
+.mando:hover:not(:disabled) { border-color: var(--nar); color: #fff; }
+.mando:disabled { opacity: .6; cursor: progress; }
+.mando[hidden] { display: none; }
+.mando.ancho { padding: 0 12px; font: 700 .72rem "Orbitron", system-ui, sans-serif; letter-spacing: .06em; }
+#v-barra { flex: 1 1 140px; min-width: 0; accent-color: #ff8400; }
+.v-tiempo { font: .85rem "Share Tech Mono", ui-monospace, monospace; color: var(--hielo); white-space: nowrap; }
+.v-aviso { margin: 8px 0 0; min-height: 1em; }
+@media (max-width: 520px) { #v-barra { order: -1; flex-basis: 100%; } }
