@@ -146,16 +146,10 @@
       --red:#ff667d;
       --shadow:0 0 18px rgba(255,85,200,.20),0 0 30px rgba(98,231,242,.14);
     }
-    body{
-      background-color:var(--bg);
-      background-image:
-        linear-gradient(rgba(255,200,87,.035) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(98,231,242,.04) 1px,transparent 1px),
-        radial-gradient(circle at 18% 10%,rgba(155,99,244,.16),transparent 32%),
-        radial-gradient(circle at 82% 0,rgba(255,85,200,.10),transparent 28%);
-      background-size:28px 28px,28px 28px,auto,auto;
-      background-attachment:fixed;
-    }
+    body{ background:#000; }
+    /* Fondo negro animado (fondo.js) */
+    #fondo-animado{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+    @media print{#fondo-animado{display:none}}
     #quiz-container{
       border-color:rgba(255,200,87,.34);
       box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.05);
@@ -262,8 +256,9 @@
   </div>
 
   <div id="toast" class="toast hidden" role="status"></div>
-  <script src="data/indice.js?v=20261112a"></script>
-  <script src="comun.js?v=20261112a"></script>
+  <script src="data/indice.js?v=20261112b"></script>
+  <script src="comun.js?v=20261112b"></script>
+  <script src="fondo.js?v=20261112b"></script>
   <script>
     // Parámetros: ?u=M1_U01&t=1|2|azar|oficial|fallos. Se cargan los archivos de la unidad antes del examen.
     const PARAM = new URLSearchParams(location.search);

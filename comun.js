@@ -8,7 +8,7 @@ const ALUMNA = { nombre: "María", completo: "María Oyonarte" };
 const NOTEBOOK = "https://notebook.google.com/notebook/3e7a706b-d691-46a8-876e-c6b363262ef4/preview";
 
 // Versión de los archivos: cámbiala al publicar para que el navegador no use copias antiguas.
-const VERSION = "20261112a";
+const VERSION = "20261112b";
 
 function saludo() {
   const h = new Date().getHours();
