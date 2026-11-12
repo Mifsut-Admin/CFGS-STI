@@ -126,8 +126,8 @@ function vistaModulo(idModulo) {
         <span class="etiqueta">${esc(m.codigo)}</span>
         <h2 id="t-mod">${esc(m.nombre)}</h2>
         <div class="acciones-mod">
-          <button class="neon c-gris mini" id="abrir-todas" type="button">Abrir todas</button>
-          <button class="neon c-gris mini" id="cerrar-todas" type="button">Cerrar todas</button>
+          <button class="neon c-gris mini" id="abrir-todas" type="button"><span class="txt">Abrir todas</span></button>
+          <button class="neon c-gris mini" id="cerrar-todas" type="button"><span class="txt">Cerrar todas</span></button>
         </div>
       </div>
       ${m.unidades.map((u) => estaLista(u.id) ? `
@@ -160,7 +160,7 @@ function vistaLista(titulo, ayuda, filtro, modo, detalle) {
       ${filas.length ? `<div class="fallos-lista">${filas.map(({ m, u }) => `
         <div class="fallo" style="border-color:${ESTILO[m.id].color}55">
           <span><strong>${esc(m.codigo)} · U${u.n}</strong> ${esc(u.titulo)}<br><small style="color:var(--muted)">${esc(detalle(u.id))}</small></span>
-          <a class="neon ${modo === "fallos" ? "c-rojo" : "c-azul"} mini" href="${enlace(u.id, modo)}">Empezar</a>
+          <a class="neon ${modo === "fallos" ? "c-rojo" : "c-azul"} mini" href="${enlace(u.id, modo)}"><span class="txt">Empezar</span></a>
         </div>`).join("")}</div>` : `<p class="vacio">No hay nada aquí todavía. Haz algún examen y vuelve.</p>`}
     </section>`;
   rellenarLanzador();
