@@ -32,8 +32,8 @@ function pintarBotonera(vista) {
   botones.push({ href: "#oficiales", clase: "c-azul", texto: "Autoevaluaciones", id: "oficiales", titulo: "Autoevaluaciones oficiales de la plataforma" });
   botones.push({ href: "#fallos", clase: "c-rojo", texto: "Repasar fallos", id: "fallos", titulo: "Unidades con preguntas falladas" });
   document.getElementById("botonera").innerHTML = botones.map((b) => `
-    <a class="neon ${b.clase}" href="${b.href}" title="${esc(b.titulo)}" aria-pressed="${vista === b.id}">${esc(b.texto)}</a>`).join("") + (NOTEBOOK ? `
-    <a class="neon c-verde preguntame" href="${NOTEBOOK}" target="_blank" rel="noopener" title="Resolver dudas con el cuaderno de NotebookLM">❓ Pregúntame</a>` : "");
+    <a class="neon ${b.clase}" href="${b.href}" title="${esc(b.titulo)}" aria-pressed="${vista === b.id}"><span class="txt">${esc(b.texto)}</span></a>`).join("") + (NOTEBOOK ? `
+    <a class="neon c-verde preguntame" href="${NOTEBOOK}" target="_blank" rel="noopener" title="Resolver dudas con el cuaderno de NotebookLM"><span class="txt">❓ Pregúntame</span></a>` : "");
   document.getElementById("botonera").classList.toggle("con-preguntame", !!NOTEBOOK);
 }
 
