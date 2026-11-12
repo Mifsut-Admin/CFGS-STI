@@ -39,8 +39,8 @@ a { color: inherit; }
 .cabecera { position: relative; display: flex; align-items: center; gap: 14px; padding: 6px 0 16px; }
 .cabecera::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(90deg, var(--cyan), rgba(155, 99, 244, .5) 40%, transparent); box-shadow: 0 0 8px var(--cyan); }
 .cabecera h1 { margin: 0; font: 900 1.15rem/1.2 var(--tit); letter-spacing: .04em; color: #fff; text-shadow: 0 0 6px rgba(98, 231, 242, .7), 0 0 20px rgba(98, 231, 242, .35); }
-.cabecera p { margin: 5px 0 0; color: var(--muted); font: .85rem var(--mono); letter-spacing: .03em; display: flex; align-items: center; gap: 8px; }
-.cabecera p::before { content: ""; flex: none; width: 26px; height: 2px; background: var(--nar); box-shadow: 0 0 8px var(--nar); }
+.cabecera > div > p { margin: 5px 0 0; color: var(--muted); font: .85rem var(--mono); letter-spacing: .03em; display: flex; align-items: center; gap: 8px; }
+.cabecera > div > p::before { content: ""; flex: none; width: 26px; height: 2px; background: var(--nar); box-shadow: 0 0 8px var(--nar); }
 /* Foto de María */
 .avatar { flex: none; width: 54px; height: 72px; border-radius: 10px; object-fit: cover; object-position: center top; background: #0b0e16; border: 1.5px solid var(--cyan); box-shadow: 0 0 10px rgba(98, 231, 242, .7), 0 0 28px rgba(98, 231, 242, .25); }
 
@@ -372,3 +372,59 @@ details[open] .flecha { transform: rotate(180deg); box-shadow: 0 0 10px color-mi
 /* Fondo negro animado (fondo.js): lienzo fijo detrás de todo el contenido */
 #fondo-animado { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
 @media print { #fondo-animado { display: none; } }
+
+/* ---------- Ventana de ánimo en la cabecera (animo.js) ----------
+   En escritorio ocupa el hueco a la derecha del nombre; en móvil aparece debajo. */
+.cabecera { flex-wrap: wrap; }
+.cabecera > div:not(.animo) { flex: 1 1 0; min-width: 0; }
+.animo { flex: 1 1 100%; max-height: 0; opacity: 0; transition: max-height .5s ease, opacity .4s ease, margin .5s ease; }
+.animo.visible { max-height: 220px; opacity: 1; margin-top: 4px; }
+.animo-ventana {
+  position: relative; isolation: isolate; overflow: hidden;
+  padding: 10px 14px 12px; border-radius: 12px;
+  background: linear-gradient(90deg, #ff55c8, #62e7f2);
+  box-shadow: 0 0 14px rgba(255, 85, 200, .35), 0 0 34px rgba(98, 231, 242, .18);
+  transform: translateY(-8px) scale(.98); transition: transform .5s cubic-bezier(.2, .9, .3, 1.2);
+}
+.animo.visible .animo-ventana { transform: none; animation: animo-entrada .7s ease-out; }
+/* Haz de luz que da vueltas por el borde */
+.animo-ventana::before {
+  content: ""; position: absolute; z-index: -2; left: 50%; top: 50%; width: 140%; aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: conic-gradient(from 0deg, #ff55c8, #62e7f2 25%, #ff8400 50%, #9b63f4 75%, #ff55c8);
+  animation: haz-neon 6s linear infinite;
+}
+/* Cristal oscuro del interior */
+.animo-ventana::after {
+  content: ""; position: absolute; z-index: -1; inset: 1.5px; border-radius: 11px;
+  background:
+    radial-gradient(120% 160% at 0 0, rgba(255, 85, 200, .16), transparent 55%),
+    radial-gradient(120% 160% at 100% 100%, rgba(98, 231, 242, .14), transparent 55%),
+    #070910;
+}
+.animo-cab { display: flex; align-items: center; gap: 8px; }
+.animo-punto { width: 8px; height: 8px; border-radius: 50%; background: #ff55c8; box-shadow: 0 0 8px #ff55c8; animation: animo-latido 1.4s ease-in-out infinite; }
+.animo-titulo { font: .72rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--nar); text-shadow: 0 0 6px rgba(255, 132, 0, .6); }
+.animo-cerrar { margin-left: auto; width: 26px; height: 26px; padding: 0; border-radius: 6px; border: 1px solid rgba(172, 232, 255, .3); background: rgba(0, 0, 0, .4); color: var(--hielo); font-size: 1rem; line-height: 1; cursor: pointer; transition: border-color .2s, color .2s, box-shadow .2s; }
+.animo-cerrar:hover { border-color: #ff55c8; color: #fff; box-shadow: 0 0 10px rgba(255, 85, 200, .5); }
+.animo-cerrar:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.animo-frase { margin: 6px 0 9px; min-height: 2.8em; font: 600 .98rem/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #fff; text-shadow: 0 0 10px rgba(98, 231, 242, .35); }
+.animo-frase.escribiendo::after { content: "▌"; margin-left: 1px; color: var(--cyan); animation: animo-cursor .7s steps(1) infinite; }
+.animo-tiempo { height: 2px; border-radius: 2px; background: rgba(255, 255, 255, .08); overflow: hidden; }
+.animo-tiempo span { display: block; height: 100%; transform-origin: left; background: linear-gradient(90deg, #ff55c8, #62e7f2); box-shadow: 0 0 8px #ff55c8; }
+.animo-lector { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@keyframes animo-entrada {
+  0% { opacity: 0; filter: brightness(2.2); }
+  15% { opacity: 1; }
+  25% { opacity: .3; }
+  40% { opacity: 1; filter: brightness(1.4); }
+  100% { opacity: 1; filter: none; }
+}
+@keyframes animo-latido { 50% { opacity: .35; transform: scale(.75); } }
+@keyframes animo-cursor { 50% { opacity: 0; } }
+@media (min-width: 900px) {
+  .cabecera { flex-wrap: nowrap; min-height: 134px; }
+  .cabecera > div:not(.animo) { flex: 0 1 auto; }
+  .animo { flex: 0 1 560px; margin-left: auto; }
+  .animo.visible { margin-top: 0; }
+}
